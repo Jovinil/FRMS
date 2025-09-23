@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --color-primary: #C62828;   /* strong red */
+  --color-secondary: #1565C0; /* royal blue */
+  --color-accent: #F9A825;    /* golden yellow */
+  --color-info: #64B5F6;      /* sky blue */
+  --color-dark: #000000;
+  --color-light: #F5F5F5;
+
+  --color-active-color: #f4c2c2;
+}
