@@ -22,10 +22,19 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/scripts',
     '@nuxt/test-utils',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    '@pinia/nuxt'
   ],
 
   css: [
     '~/assets/css/main.css',
+    'mapbox-gl/dist/mapbox-gl.css',
+    '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
   ],
+
+    runtimeConfig: {
+    public: {
+      mapboxToken: process.env.NUXT_PUBLIC_MAPBOX_TOKEN,
+    }
+  },
 })
