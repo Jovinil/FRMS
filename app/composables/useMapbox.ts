@@ -8,6 +8,8 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
   const map = ref<any>(null)
   const mapboxgl = ref<any>(null)
 
+  const config = useRuntimeConfig()
+
 
   // --- Lifecycle ---
   onMounted(async () => {
@@ -44,6 +46,7 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
     window.addEventListener("resize", () => {
       if (map.value) map.value.resize()
     })
+
   })
 
   onUnmounted(() => {
@@ -52,6 +55,6 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
   })
 
   return {
-    map,
+    map
   }
 }
