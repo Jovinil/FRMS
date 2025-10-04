@@ -11,6 +11,7 @@ const handleLogin = async () => {
         email: email.value,
         password: password.value
     }) 
+    console.log(data.user)
 }
 </script>
 
@@ -24,8 +25,8 @@ const handleLogin = async () => {
     <form @submit.prevent="handleLogin" class="flex flex-col items-center justify-center h-full gap-20">
         <p class="z-10 text-2xl font-bold">ADMIN LOGIN</p>
         <div class="flex flex-col gap-15 w-full items-center">
-            <UInput name="email" type="email" placeholder="Email" class="w-1/2" />
-            <UInput name="password" type="password" placeholder="Password" class="w-1/2" />
+            <UInput v-model="email" type="email" placeholder="Email" class="w-1/2" />
+            <UInput v-model="password" type="password" placeholder="Password" class="w-1/2" />
         </div>
       
 
