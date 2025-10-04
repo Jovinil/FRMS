@@ -23,18 +23,21 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxt/test-utils',
     '@nuxt/ui',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/supabase'
   ],
 
   css: [
     '~/assets/css/main.css',
-    'mapbox-gl/dist/mapbox-gl.css',
-    '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
+    // 'mapbox-gl/dist/mapbox-gl.css',
+    // '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
   ],
 
     runtimeConfig: {
     public: {
       mapboxToken: process.env.NUXT_PUBLIC_MAPBOX_TOKEN,
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseKey: process.env.SUPABASE_KEY
     }
   },
 })

@@ -1,0 +1,474 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String
+  password String
+  role Role
+  status String
+  generatedReports GeneratedReport[]
+  floodRiskMap FLoodRiskMap[]
+  damageAssessmentNeedAnalysisReport DamageAssessmentNeedAnalysisReport[]
+  rapidDamageAssessmentNeedAnalysisReport RapidDamageAssessmentNeedAnalysisReport[]
+
+  createdAt DateTime @default(now())
+}
+
+model Barangay {
+  id Int @id @default(autoincrement())
+  name String
+  population BigInt
+  location String
+  longitude Decimal
+  latitude Decimal
+  evacuationCenters EvacuationCenter[]
+  floodRiskMap FLoodRiskMap[]
+  damageAssessmentNeedAnalysisReport DamageAssessmentNeedAnalysisReport[]
+  rapidDamageAssessmentNeedAnalysisReport RapidDamageAssessmentNeedAnalysisReport[]
+  createdAt DateTime @default(now())
+}
+
+model EvacuationCenter {
+  id Int @id @default(autoincrement())
+  name String
+  address String
+  capacity Int
+  barangayId Int
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+  evacueesReportId Int
+  evacueesReport EvacueesReport @relation(fields: [evacueesReportId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model GeneratedReport {
+  id Int @id @default(autoincrement())
+  reportType String
+  filePath String
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model FLoodRiskMap {
+  id Int @id @default(autoincrement())
+  riskLevel String
+  filePath String
+  barangayId Int
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model DamageAssessmentNeedAnalysisReport {
+  id Int @id @default(autoincrement())
+  status String
+  summary String
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  barangayId Int
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model RapidDamageAssessmentNeedAnalysisReport {
+  id Int @id @default(autoincrement())
+  status String
+  summary String
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  barangayId Int
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// DANA
+model DamageAssessmentReport {
+  id Int @id @default(autoincrement())
+  disasterType String
+  occurenceDate DateTime
+  reportSource String
+  reportDate DateTime
+
+  areasAffected AreaAffected[]
+  populationAffected PopulationAffected?
+  populationDisplaced PopulationDisplaced?
+  casualties Casualties?
+  damagedProperties DamagedProperty[]
+  damagedLifelines DamagedLifeline[]
+  communicationFacilities CommunicationFacility[]
+  electricalFacilities ElectricalFacility[]
+  waterFacilities WaterFacility[]
+  crops Crop[]
+  fishiries Fisheries[]
+  livestocks LiveStock[]
+  localActions LocalAction?
+  evacueesReport EvacueesReport?
+}
+
+model AreaAffected {
+  id Int @id @default(autoincrement())
+  name String
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model PopulationAffected {
+  id Int @id @default(autoincrement())
+  families Int
+  persons Int
+  children Int
+  reportId Int @unique
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model PopulationDisplaced {
+  id Int @id @default(autoincrement())
+  families Int
+  persons Int
+  infants Int
+  children Int
+  adolescents Int
+  adults Int
+  reportId Int @unique
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model Casualties {
+  id Int @id @default(autoincrement())
+  dead Int
+  injured Int
+  missing Int
+  reportId Int @unique
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model DamagedProperty {
+  id Int @id @default(autoincrement())
+  category String // School, House, HOspital, etc...
+  totally Int
+  partially Int
+  estCostTotally Float
+  estCostPartially Float
+  totalCost Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model DamagedLifeline {
+  id Int @id @default(autoincrement())
+  location String
+  category String // Bridge, Railway, Road
+  passable Boolean
+  number Int
+  cost Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model CommunicationFacility {
+  id Int @id @default(autoincrement())
+  location String
+  category String // Pldt,  bayan tel, cell sites, repeaters
+  operational Boolean
+  number Int
+  cost Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model ElectricalFacility {
+  id Int @id @default(autoincrement())
+  location String
+  operational Boolean
+  number Int
+  cost Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model WaterFacility {
+  id Int @id @default(autoincrement())
+  location String
+  operational Boolean
+  number Int
+  cost Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+
+// attribute names may need some work
+model Crop {
+  id Int @id @default(autoincrement())
+  cropType String // Rice, Corn, Vegetables, Roots Crops, etc...
+  areaDamaged Float
+  lossesTons Float
+  lossesValue Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model Fisheries {
+  id Int @id @default(autoincrement())
+  type String // fishpond, fishing boaat
+  number Int
+  lossesTons Float?
+  lossesValue Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model LiveStock {
+  id Int @id @default(autoincrement())
+  animalType String // farm, poultry, etc...
+  heads Int
+  pesoValue Float
+  reportId Int
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model LocalAction {
+  id Int @id @default(autoincrement())
+  respondersInvolved String
+  assetsDeployed String
+  affectedPopulationFamilies Int
+  affectedPopulationPersons Int
+  displacedPopulationFamilies Int
+  displacedPopulationPersons Int
+  displacedInfants Int
+  displacedChildren Int
+  displacedAdults Int
+  extentOfAssistance String
+  reportId Int @unique
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+model EvacueesReport {
+  id Int @id @default(autoincrement())
+  date DateTime
+  barangay String
+  typeOfDisaster String
+  totalEvacCenters Int
+  evacCenters EvacuationCenter[]
+  totalFamilies Int
+  totalPerson Int
+  preparedBy String
+  notedBy String
+  reportId Int @unique
+  report DamageAssessmentReport @relation(fields: [reportId], references: [id])
+}
+
+
+// RDANA
+model RapidDamageAssessmentReport {
+  id Int @id @default(autoincrement())
+  operation String
+  eventype String
+  eventDate DateTime
+  region String
+  province String
+  city String
+  barangay String
+  sitioPurok String?
+  gpsCoords String?
+  reportDate DateTime
+
+  localAuthority LocalAuthority?
+  demographics Demographics?
+  accessibility Accessibility?
+  powerAndElectricity PowerAndElectricity?
+  communication Communication?
+  evacuationCenterDetail EvacuationCenterDetail[]
+  sanitation Sanitation?
+  health Health?
+  nutrition Nutrition?
+  protection Protection?
+  eduation Education?
+  livelihood Livelihood?
+  communityEngagement CommunityEngagement?
+  overallAssessment OverallAssessment?
+}
+
+model LocalAuthority {
+  id Int @id @default(autoincrement())
+  name String
+  age Int?
+  office String?
+  designation String?
+  phone String?
+  email String?
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Demographics {
+  id Int @id @default(autoincrement())
+  affectedFamilies Int
+  affectedPerson Int
+  displacedFamiliesInsideEvacCenter Int
+  displacedFamiliesOutsideEvacCenter Int
+  displacedPersonsInsideEvacCenter Int
+  displacedPersonOutsideEvacCenter Int
+  affectedChildren0to2 Int
+  affectedChildren3to5 Int
+  affectedChildren6to12 Int
+  affectedChildren13to17 Int
+  pwd Int
+  elderly Int
+  missingMale Int
+  missingFemale Int
+  injuredMale Int
+  injuredFemale Int
+  deadMale Int
+  deadFemale Int
+  totalDead Int
+  
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Accessibility {
+  id Int @id @default(autoincrement())
+  isAccessible Boolean
+  transportModes String[]
+  damagedRoads Boolean
+  needs String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model PowerAndElectricity {
+  id Int @id @default(autoincrement())
+  status String
+  daysFuelStock Int?
+  urgentNeed String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Communication {
+  id Int @id @default(autoincrement())
+  telecomServices String[]
+  operationalServices String[]
+  alternativeComm String[]
+  urgentNeeds String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model EvacuationCenterDetail {
+  id Int @id @default(autoincrement())
+  name String
+  address String?
+  gpsCoords String?
+  families Int
+  persons Int
+
+  rapidReportId Int
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Sanitation {
+  id Int @id @default(autoincrement())
+  facilities String[]
+  immidiateNeed String[]
+  
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Health {
+  id Int @id @default(autoincrement())
+  hasAccess Boolean
+  facilities String[]
+  mainConcerns String[]
+  levelOfSupplies String
+  urgentNeed String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Nutrition {
+  id Int @id @default(autoincrement())
+  breastfeedingInfo Boolean
+  milkProductsDist Boolean
+  interventions String[]
+  urgentNeeds String[]
+   rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Protection {
+  id Int @id @default(autoincrement())
+  violenceReported Boolean
+  vulnerableGroups String[]
+  protectionMechanisms String[]
+  urgentNeeds String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Education {
+  id Int @id @default(autoincrement())
+  classroomsAsEvacCenter Int
+  childrenInEvacCenter Int
+  destroyedClassrooms Int
+  damagedClassrooms Int
+  urgentNeeds String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model Livelihood {
+  id Int @id @default(autoincrement())
+  mainSource String
+  urgentNeeds String[]
+
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model CommunityEngagement {
+  id Int @id @default(autoincrement())
+  receivesInfo Boolean
+  infoNeeds String[]
+  sources String[]
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+model OverallAssessment {
+  id Int @id @default(autoincrement())
+  situation String
+  risks String[]
+  rapidReportId Int @unique
+  rapidReport RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
+}
+
+enum Role{
+  MDRRMO
+  BARANGAT_OFFICIAL
+  ADMIN
+}
