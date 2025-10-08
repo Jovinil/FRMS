@@ -1,8 +1,10 @@
 <script setup lang="ts">
+
 definePageMeta({
   layout: 'empty'
 })
 const client = useSupabaseClient()
+const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 
@@ -11,7 +13,14 @@ const handleLogin = async () => {
         email: email.value,
         password: password.value
     }) 
-    console.log(data.user)
+    if(data.user){
+        authStore.login(data.user.email)
+    }
+    if(error){
+        // THIS IS THE ERROR MESSAGE CAN BE USED FOR WHEN INCORRECT
+        //  CREDENTIALS ARE GIVEN ETC
+        console.log(error.message)
+    }
 }
 </script>
 

@@ -1,12 +1,17 @@
 import type { User } from "@prisma/client"
+import SuperJSON from "superjson"
 import z from "zod"
 
 const createAccountSchema = z.object({
     name: z.string(),
     email: z.string().email(),
     password: z.string(),
-    role: z.enum(['ADMIN', 'BARANGAT_OFFICIAL', 'MDRRMO'])
+    role: z.enum(['ADMIN', 'BARANGAY_OFFICIAL', 'MDRRMO'])
 
+})
+
+const emailSchema = z.object({
+    email: z.string().email()
 })
 
 // interface UserState {
@@ -37,6 +42,41 @@ export const useAuthStore = defineStore('auth', {
             }catch(error){
                 console.log(`${error} occured while trying to create account`)
             }
+        },
+
+        async login(email?: string) {
+            if(!email) console.log("recea")
+            const validated = emailSchema.safeParse({email})
+
+            if(!validated.success){
+                console.log(validated.error.issues)
+                return;
+            }
+
+            try{
+                const { data } = await $fetch('/api/user/login', {
+                    method: 'POST',
+                    body: validated.data,
+                })
+                this.user = SuperJSON.deserialize(data)
+                switch (this.user!.role) {
+                    case 'ADMIN':
+                        navigateTo('/admin')
+                        break;
+                    case 'BARANGAY_OFFICIAL':
+                        navigateTo('/barangay')
+                        break;
+                    case 'MDRRMO':
+                        navigateTo('/mdrrmo')
+                        break;
+                    default:
+                        navigateTo('/login')
+                        break;
+                }
+            }catch(error){
+                console.log(`${error} occured`);
+            }
+             
         }
     }
 })

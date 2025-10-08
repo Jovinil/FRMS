@@ -469,6 +469,6 @@ model OverallAssessment {
 
 enum Role {
   MDRRMO
-  BARANGAT_OFFICIAL
+  BARANGAY_OFFICIAL
   ADMIN
 }
