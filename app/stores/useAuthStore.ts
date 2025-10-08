@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
     }),
     
     actions: {
-        createAccount (name : string, email : string, password : string, role : 'ADMIN' | 'BARANGAT_OFFICIAL' | 'MDRRMO') {
+        createAccount (name : string, email : string, password : string, role : 'ADMIN' | 'BARANGAY_OFFICIAL' | 'MDRRMO') {
             console.log(role)
             const validated = createAccountSchema.safeParse({name, email, password, role});
 
