@@ -4,7 +4,7 @@ const signupSchema = z.object({
     name: z.string(),
     email: z.string().email(),
     password: z.string(),
-    role: z.enum(['ADMIN', 'BARANGAT_OFFICIAL', 'MDRRMO'])
+    role: z.enum(['ADMIN', 'BARANGAY_OFFICIAL', 'MDRRMO'])
 })
 
 export default defineEventHandler(async (event) => {

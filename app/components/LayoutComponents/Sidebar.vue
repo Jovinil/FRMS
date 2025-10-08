@@ -29,7 +29,7 @@ const adminMenu = [
   { label: "User Management", to: "/admin/userManagement" },
   { label: "RDANA/DANA", to: "/admin/rdana" },
   { label: "Generate Report", to: "/admin/generateReport" },
-  { label: "Logout", to: "/" }
+  { label: "Logout", to: "/logout" }
 ]
 
 const MDRRMOMenu = [
@@ -37,14 +37,14 @@ const MDRRMOMenu = [
   { label: "Generate Report", to: "/mdrrmo/report" },
   { label: "Map", to: "/mdrrmo/map" },
   { label: "RDANA/DANA", to: "/mdrrmo/reports" },
-  { label: "Logout", to: "/" }
+  { label: "Logout", to: "/logout" }
 ]
 
 const barangayMenu = [
   { label: "RDANA", to: "/barangay/" },
   { label: "DANA", to: "/barangay/dana" },
   { label: "Evacuation Center", to: "/barangay/evac" },
-  { label: "Logout", to: "/" }
+  { label: "Logout", to: "/logout" }
 ]
 // ... end of menu definitions
 
