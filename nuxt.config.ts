@@ -29,6 +29,7 @@ export default defineNuxtConfig({
 
   css: [
     '~/assets/css/main.css',
+    '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
     // 'mapbox-gl/dist/mapbox-gl.css',
     // '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
   ],

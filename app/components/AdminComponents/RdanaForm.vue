@@ -2,7 +2,7 @@
 <template>
   <div class="">
     <h1 class="text-2xl md:text-3xl font-bold text-primary">
-      RAPID DAMAGE ASSESSMENT AND NEEDS ANALYSIS (RDANA) FORM 1
+      RAPID DAMAGE ASSESSMENT AND NEEDS ANALYSIS (RDANA)
     </h1>
 
     <UAlert v-if="errors.length" color="primary" variant="soft" title="Please fix the following before submitting" class="mb-2">

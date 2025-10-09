@@ -1,100 +1,102 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { FormError, FormSubmitEvent } from '#ui/types'
+import { useDamageAssessmentForm } from '~/composables/useDanaForm'
 
-// form state
-const state = ref({
-  incidentName: '',
-  date: '',
-  location: '',
-  disasterType: '',
-  casualties: 0,
-  injured: 0,
-  missing: 0,
-  affectedFamilies: 0,
-  infrastructureDamage: '',
-  immediateNeeds: [],
-  remarks: ''
-})
-
-const disasterTypes = ['Flood', 'Earthquake', 'Typhoon', 'Landslide', 'Fire']
-const needsOptions = ['Food', 'Water', 'Shelter', 'Medical', 'Rescue', 'Communication']
-
-// validation
-const validate = (state: any): FormError[] => {
-  const errors: FormError[] = []
-  if (!state.incidentName) errors.push({ name: 'incidentName', message: 'Required' })
-  if (!state.date) errors.push({ name: 'date', message: 'Required' })
-  if (!state.location) errors.push({ name: 'location', message: 'Required' })
-  if (!state.disasterType) errors.push({ name: 'disasterType', message: 'Required' })
-  return errors
-}
-
-// submit handler
-const onSubmit = async (event: FormSubmitEvent<typeof state.value>) => {
-  console.log('RDANA submitted:', event.data)
-  // here you can send to Firestore or your backend API
-}
+const { schema, state, onSubmit } = useDamageAssessmentForm()
 </script>
 
 <template>
-    DAAAAAAANA
-  <UCard class="w-full mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-6">Rapid Damage Assessment and Needs Analysis (RDANA) Form</h2>
+  <h1 class="text-2xl md:text-3xl font-bold text-primary">
+    DAMAGE ASSESSMENT AND NEEDS ANALYSIS (DANA)
+  </h1>
 
-    <UForm :state="state" :validate="validate" @submit="onSubmit" class="space-y-6">
-      <UFormGroup label="Incident Name" name="incidentName">
-        <UInput v-model="state.incidentName" placeholder="e.g. Flooding in Barangay X" />
-      </UFormGroup>
+  <UCard>
+    <UForm :schema="schema" :state="state" class="space-y-8" @submit="onSubmit">
+      <!-- A. Profile of the Disaster -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold">A. Profile of the Disaster</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <UFormGroup label="Date" name="date">
-          <UInput v-model="state.date" type="date" />
-        </UFormGroup>
+        <UFormField label="Type of Disaster / Emergency" name="disasterType">
+          <UInput v-model="state.disasterType" placeholder="e.g., Flood, Earthquake" />
+        </UFormField>
 
-        <UFormGroup label="Location" name="location">
-          <UInput v-model="state.location" placeholder="City / Barangay" />
-        </UFormGroup>
+        <UFormField label="Date and Time of Occurrence" name="dateTimeOccurrence">
+          <UInput v-model="state.dateTimeOccurrence" type="datetime-local" />
+        </UFormField>
+
+        <UFormField label="Source of Report" name="sourceOfReport">
+          <UInput v-model="state.sourceOfReport" placeholder="e.g., Barangay Captain" />
+        </UFormField>
+
+        <UFormField label="Date and Time of Report" name="dateTimeReport">
+          <UInput v-model="state.dateTimeReport" type="datetime-local" />
+        </UFormField>
       </div>
 
-      <UFormGroup label="Type of Disaster" name="disasterType">
-        <USelect v-model="state.disasterType" :options="disasterTypes" placeholder="Select type" />
-      </UFormGroup>
+      <!-- B. Summary of Effects -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold">B. Summary of the Effects</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <UFormGroup label="Casualties" name="casualties">
-          <UInput v-model.number="state.casualties" type="number" min="0" />
-        </UFormGroup>
-        <UFormGroup label="Injured" name="injured">
-          <UInput v-model.number="state.injured" type="number" min="0" />
-        </UFormGroup>
-        <UFormGroup label="Missing" name="missing">
-          <UInput v-model.number="state.missing" type="number" min="0" />
-        </UFormGroup>
+        <UFormField label="Areas Affected" name="areasAffected">
+          <UTextarea v-model="state.areasAffected" placeholder="List affected barangays, municipalities..." />
+        </UFormField>
+
+        <div class="grid grid-cols-3 gap-4">
+          <UFormField label="Families Affected" name="familiesAffected">
+            <UInput v-model="state.familiesAffected" type="number" />
+          </UFormField>
+          <UFormField label="Persons Affected" name="personsAffected">
+            <UInput v-model="state.personsAffected" type="number" />
+          </UFormField>
+          <UFormField label="Children (1–17 yrs)" name="childrenAffected">
+            <UInput v-model="state.childrenAffected" type="number" />
+          </UFormField>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <UFormField label="Families Displaced" name="familiesDisplaced">
+            <UInput v-model="state.familiesDisplaced" type="number" />
+          </UFormField>
+          <UFormField label="Persons Displaced" name="personsDisplaced">
+            <UInput v-model="state.personsDisplaced" type="number" />
+          </UFormField>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4">
+          <UFormField label="Infants (0–1)" name="infants">
+            <UInput v-model="state.infants" type="number" />
+          </UFormField>
+          <UFormField label="Children (2–12)" name="children">
+            <UInput v-model="state.children" type="number" />
+          </UFormField>
+          <UFormField label="Adolescents (13–17)" name="adolescents">
+            <UInput v-model="state.adolescents" type="number" />
+          </UFormField>
+          <UFormField label="Adults (18+)" name="adults">
+            <UInput v-model="state.adults" type="number" />
+          </UFormField>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <UFormField label="Dead" name="dead">
+            <UInput v-model="state.dead" type="number" />
+          </UFormField>
+          <UFormField label="Injured" name="injured">
+            <UInput v-model="state.injured" type="number" />
+          </UFormField>
+          <UFormField label="Missing" name="missing">
+            <UInput v-model="state.missing" type="number" />
+          </UFormField>
+        </div>
+
+        <UFormField label="Remarks / Additional Notes" name="remarks">
+          <UTextarea v-model="state.remarks" placeholder="Any other relevant information..." />
+        </UFormField>
       </div>
 
-      <UFormGroup label="Affected Families" name="affectedFamilies">
-        <UInput v-model.number="state.affectedFamilies" type="number" min="0" />
-      </UFormGroup>
-
-      <UFormGroup label="Infrastructure Damage" name="infrastructureDamage">
-        <UTextarea v-model="state.infrastructureDamage" placeholder="Brief description" />
-      </UFormGroup>
-
-      <UFormGroup label="Immediate Needs" name="immediateNeeds">
-        <USelectMenu
-          v-model="state.immediateNeeds"
-          :options="needsOptions"
-          multiple
-          placeholder="Select needs"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="Remarks" name="remarks">
-        <UTextarea v-model="state.remarks" placeholder="Additional notes" />
-      </UFormGroup>
-
-      <UButton type="submit" variant="solid" color="info">Submit Assessment</UButton>
+      <div class="pt-6">
+        <UButton type="submit" color="primary">Submit Report</UButton>
+      </div>
     </UForm>
   </UCard>
+  
 </template>

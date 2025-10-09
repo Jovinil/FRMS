@@ -28,10 +28,10 @@ const rdanaSelectStore = useRDANASelectStore()
 // map store value -> component
 const selectedFormComponent = computed(() => {
   switch (rdanaSelectStore.isSelected) {
-    case 'rdana':
+    case 'RDANA':
       return AdminComponentsRdanaForm
-    case 'dana':
-      return AdminComponentsDanaForm
+   case 'DANA':
+     return AdminComponentsDanaForm
     default:
       return null
   }
