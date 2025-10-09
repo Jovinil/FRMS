@@ -353,7 +353,6 @@
         <UButton color="primary" variant="soft" icon="i-heroicons-plus" @click="addEvacuationCenter">Add Evacuation Center</UButton>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="6.4 Existing protection mechanisms (check all that applies)">
         <UCheckboxGroup v-model="form.evacuation.protectionMechanisms" :items="EVAC_PROTECTION_MECHANISMS" />
@@ -362,7 +361,6 @@
         </div>
       </UFormField>
 
-      <UDivider class="my-6" />
 
       <UFormField label="6.5 Operational in the evacuation areas (check all that applies)">
         <UCheckboxGroup v-model="form.evacuation.facilitiesOperational" :items="EVAC_FACILITIES_OPERATIONAL" />
@@ -484,7 +482,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="10.3 Based on current situation, most immediate need on shelter (check all that apply)">
         <UCheckboxGroup v-model="form.shelter.immediateNeeds" :items="SHELTER_IMMEDIATE_NEEDS" />
@@ -517,7 +514,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="11.5 Based on current situation, most immediate food need">
         <UCheckboxGroup v-model="form.food.immediateNeeds" :items="FOOD_IMMEDIATE_NEEDS" />
@@ -550,7 +546,6 @@
         <URadioGroup v-model="form.water.hasContainersWithLid" :items="['Yes','No']" />
       </UFormField>
 
-      <UDivider class="my-6" />
 
       <UFormField label="12.5 Most immediate needs for water systems">
         <UCheckboxGroup v-model="form.water.immediateNeeds" :items="WATER_IMMEDIATE_NEEDS" />
@@ -578,7 +573,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="13.4 Most immediate need on sanitation (check all that apply)">
         <UCheckboxGroup v-model="form.sanitation.immediateNeeds" :items="SANITATION_IMMEDIATE_NEEDS" />
@@ -618,7 +612,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="14.5 Most immediate need on health">
         <UCheckboxGroup v-model="form.health.immediateNeeds" :items="HEALTH_IMMEDIATE_NEEDS" />
@@ -637,14 +630,12 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UFormField label="15.1 Is there information on infants that are exclusively breastfed?">
           <div class="flex gap-4">
-            <URadio v-model="form.nutrition.infoExclusiveBreastfeeding" label="Yes" value="Yes" />
-            <URadio v-model="form.nutrition.infoExclusiveBreastfeeding" label="No" value="No" />
+            <URadioGroup v-model="form.nutrition.infoExclusiveBreastfeeding" :items="['Yes','No']" />
           </div>
         </UFormField>
         <UFormField label="15.2 Have infant milk products and/or baby bottles/teats been distributed since the start of the emergency?">
           <div class="flex gap-4">
-            <URadio v-model="form.nutrition.distributedMilkProducts" label="Yes" value="Yes" />
-            <URadio v-model="form.nutrition.distributedMilkProducts" label="No" value="No" />
+            <URadioGroup v-model="form.nutrition.distributedMilkProducts" :items="['Yes','No']" />
           </div>
         </UFormField>
       </div>
@@ -684,7 +675,6 @@
         </div>
       </UFormField>
 
-      <UDivider class="my-6" />
 
       <UFormField label="15.4 Most immediate need on nutrition (check all that apply)">
         <UCheckboxGroup v-model="form.nutrition.immediateNeeds" :items="NUTRITION_IMMEDIATE_NEEDS" />
@@ -714,7 +704,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="16.4 Most immediate need for protection essential services">
         <UCheckboxGroup v-model="form.protection.immediateNeeds" :items="PROTECTION_IMMEDIATE_NEEDS" />
@@ -745,7 +734,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <UFormField label="17.5 Most urgent educational needs (check all that apply)">
         <UCheckboxGroup v-model="form.education.urgentNeeds" :items="EDUCATION_URGENT_NEEDS" />
@@ -765,7 +753,6 @@
         <UInput v-model="form.livelihood.mainSource" placeholder="e.g., Farming, Fishing, Retail, etc." />
       </UFormField>
 
-      <UDivider class="my-6" />
 
       <UFormField label="18.2 Most immediate need on livelihood/early recovery">
         <UCheckboxGroup v-model="form.livelihood.immediateNeeds" :items="LIVELIHOOD_IMMEDIATE_NEEDS" />
@@ -814,7 +801,6 @@
         <UTextarea v-model="form.overall.justification" placeholder="Provide detailed justification here..." />
       </UFormField>
 
-      <UDivider class="my-6" />
 
       <h3 class="text-lg font-semibold mb-2">Submitted By</h3>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -832,7 +818,6 @@
         </UFormField>
       </div>
 
-      <UDivider class="my-6" />
 
       <div class="flex items-center justify-end gap-3">
         <UButton color="info" variant="soft" @click="onReset">Reset</UButton>
