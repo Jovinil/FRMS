@@ -203,9 +203,8 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
       
       if (data.features && data.features.length > 0) {
         const elevations = data.features.map((f: any) => f.properties.ele)
-        // elevation = Math.round(elevations.reduce((a: number, b: number) => a + b, 0) / elevations.length)
-        elevation = elevations.length;
-        console.log(elevation);
+        elevation = Math.round(elevations.reduce((a: number, b: number) => a + b, 0) / elevations.length)
+
       } else {
         // Fallback to Open-Elevation API
         const openElevUrl = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`
@@ -281,7 +280,7 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
         new mapboxgl.value.Popup().setHTML(`
           <div style="padding: 12px; min-width: 250px;">
             <strong style="font-size: 14px;">${addressName}</strong>
-            <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;"/>
+            <hr style="margin: 8px 0; border: none; border-top: 1px solid #1a1a1aff;"/>
             
             <div style="margin: 10px 0;">
               <div style="display: flex; justify-content: space-between; margin: 6px 0;">
