@@ -432,8 +432,27 @@ export class RDANAForm {
   }
 
   toJSON(): Record<string, any> {
-    // Shallow serialization sufficient for plain objects
-    return JSON.parse(JSON.stringify(this))
+    const cache = new WeakSet()
+
+    const serialize = (obj: any): any => {
+      if (obj === null || typeof obj !== 'object') return obj
+
+      if (cache.has(obj)) return '[Circular]'
+      cache.add(obj)
+
+      if (obj instanceof Date) return obj.toISOString()
+      if (Array.isArray(obj)) return obj.map(serialize)
+
+      const plain: Record<string, any> = {}
+      for (const key of Object.keys(obj)) {
+        const value = obj[key]
+        plain[key] = serialize(value)
+      }
+
+      return plain
+    }
+
+    return serialize(this)
   }
 }
 
