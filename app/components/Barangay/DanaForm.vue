@@ -246,7 +246,7 @@
       </UCard>
 
       <div class="flex justify-end gap-4">
-        <UButton variant="outline" color="gray" @click="resetForm">Reset</UButton>
+        <UButton variant="outline" color="info" @click="resetForm">Reset</UButton>
         <UButton type="button" color="primary" @click="onSubmit">Submit</UButton>
       </div>
     </UForm>

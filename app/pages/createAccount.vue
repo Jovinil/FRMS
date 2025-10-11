@@ -49,17 +49,17 @@ const handleSignup = async () => {
     /> -->
     
     <form @submit.prevent="handleSignup" class="flex flex-col items-center justify-center h-full gap-20">
-        <p class="z-10 text-2xl font-bold">Create ACcount</p>
+        <p class="z-10 text-2xl font-bold">Create Account</p>
         <div class="flex flex-col gap-15 w-full items-center">
             <UInput v-model="name" type="text" placeholder="Full Name" class="w-1/2" />
             <UInput v-model="email" type="email" placeholder="Email" class="w-1/2" />
             <UInput v-model="password" type="password" placeholder="Password" class="w-1/2" />
-            <UInputMenu v-model="role" value-key="id" :items="roles" placeholder="Selec role" class="w-1/2" />
+            <UInputMenu v-model="role" value-key="id" :items="roles" placeholder="Select role" class="w-1/2" />
         </div>
       
 
         <div class=" w-1/2 flex items-center justify-center z-10 mt-">
-            <UButton type="submit" class="w-1/2" color="primary" variant="solid" :ui="{base: 'justify-center'}">Login</UButton>
+            <UButton type="submit" class="w-1/2" color="primary" variant="solid" :ui="{base: 'justify-center'}">Sign up</UButton>
         </div>
     </form>
 

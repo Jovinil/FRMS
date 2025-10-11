@@ -7,7 +7,7 @@
                 User Login
                 </template>
 
-                <AdminComponentsUserLoginTable />
+                <AdminsUserLoginTable />
 
                 <template #footer>
                     <UButton label="View Account"/>

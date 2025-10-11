@@ -1,36 +1,40 @@
 <template>
-     <UTable :data="data" :columns="columns" />
+  <UTable :data="data" :columns="columns" />
 </template>
 
 
 <script setup lang="ts">
 import type { ColumnDef } from '@tanstack/vue-table'
 
-interface Users {
+interface Reports {
   gmail: string
-  role: string
-  status: 'active' | 'inactive'
+  barangay: string
+  date_submitted: string
+  status: 'pending' | 'approved'
 }
 
-const data: Users[] = [
+const data: Reports[] = [
   {
     gmail: 'johndoe@gmail.com',
-    role: 'Barangay Official',
-    status: 'active',
+    barangay: 'Barangay 1',
+    date_submitted: '10-10-25',
+    status: 'pending',
   },
   {
     gmail: 'johndoe@gmail.com',
-    role: 'Admin',
-    status: 'inactive',
+    barangay: 'Barangay 1',
+    date_submitted: '10-10-25',
+    status: 'approved',
   },
   {
     gmail: 'johndoe@gmail.com',
-    role: 'MDRRMO Officer',
-    status: 'active',
+    barangay: 'Barangay 1',
+    date_submitted: '10-10-25',
+    status: 'pending',
   },
 ]
 
-const columns: ColumnDef<Users>[] = [
+const columns: ColumnDef<Reports>[] = [
   {
     accessorKey: 'gmail',
     header: 'Gmail',
@@ -42,8 +46,18 @@ const columns: ColumnDef<Users>[] = [
     }
   },
   {
-    accessorKey: 'role',
-    header: 'Role',
+    accessorKey: 'barangay',
+    header: 'Barangay',
+    meta: {
+      class: {
+        th: 'text-left',
+        td: 'text-left'
+      }
+    }
+  },
+  {
+    accessorKey: 'date_submitted',
+    header: 'Date Submitted',
     meta: {
       class: {
         th: 'text-left',
@@ -63,8 +77,8 @@ const columns: ColumnDef<Users>[] = [
     cell: ({ row }) => {
       const status = row.getValue('status') as string
       const colorMap = {
-        active: 'text-success',
-        inactive: 'text-error',        
+        approved: 'text-success',
+        pending: 'text-warning',        
       }
       return h(
         'span',

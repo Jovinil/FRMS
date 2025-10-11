@@ -43,7 +43,7 @@ const MDRRMOMenu = [
 const barangayMenu = [
   { label: "RDANA", to: "/barangay/" },
   { label: "DANA", to: "/barangay/dana" },
-  { label: "Evacuation Center", to: "/barangay/evac" },
+  { label: "Evacuation Center", to: "/barangay/evacuation-center" },
   { label: "Logout", to: "/logout" }
 ]
 // ... end of menu definitions

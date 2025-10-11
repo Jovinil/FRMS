@@ -3,12 +3,20 @@
     <div class="w-full md:w-3/4">
         
         <div class="w-full flex flex-col gap-3">
-            <UInputMenu
+            <div class="flex justify-between gap-3">
+              <UInputMenu
                 v-model="rdanaSelectStore.isSelected"
                 :items="rdanaSelectStore.forms"
-            />
-   
-                <component :is="selectedFormComponent" />
+                class="w-1/4"
+              />
+              <UInputMenu
+                  v-model="barangayVal"
+                  :items="barangays"
+                  class="w-3/4"
+              />  
+            </div>
+            
+            <component :is="selectedFormComponent" />
         </div>
       
     </div>
@@ -20,8 +28,8 @@ import { computed } from 'vue'
 import { useRDANASelectStore } from '~/stores/useRDANASelectStore'
 
 // import both form components
-import AdminComponentsRdanaForm from '~/components/AdminComponents/RdanaForm.vue'
-import AdminComponentsDanaForm from '~/components/AdminComponents//DanaForm.vue'
+import AdminRdanaForm from '~/components/Admin/RdanaFormRev.vue'
+import AdminDanaForm from '~/components/Admin//DanaFormRev.vue'
 
 const rdanaSelectStore = useRDANASelectStore()
 
@@ -29,11 +37,14 @@ const rdanaSelectStore = useRDANASelectStore()
 const selectedFormComponent = computed(() => {
   switch (rdanaSelectStore.isSelected) {
     case 'RDANA':
-      return AdminComponentsRdanaForm
+      return AdminRdanaForm
    case 'DANA':
-     return AdminComponentsDanaForm
+     return AdminDanaForm
     default:
       return null
   }
 })
+
+const barangayVal = ref('barangay 1');
+const barangays = ref([ 'barangay 1', 'barangay 2', 'barangay 3',]);
 </script>

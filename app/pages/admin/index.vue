@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-col gap-5">
+  <div class="flex flex-col gap-5 p-6">
     <UCard :ui="{ body: '!p-0' }">
       <template #header>
         User Login
       </template>
 
-      <AdminComponentsUserLoginTable />
+      <AdminUserLoginTable />
     </UCard>
 
     <UCard>
@@ -13,7 +13,7 @@
         Report
       </template>
       
-      no idea what to put here
+      <AdminReportsTable />
     </UCard>
 
   </div>
