@@ -5,34 +5,12 @@
 
 <script setup lang="ts">
 import type { ColumnDef } from '@tanstack/vue-table'
+import type { User } from '@prisma/client' 
 
-interface Users {
-  gmail: string
-  role: string
-  status: 'active' | 'inactive'
-}
-
-const data: Users[] = [
+const data: User[] = useAuthStore().users
+const columns: ColumnDef<User>[] = [
   {
-    gmail: 'johndoe@gmail.com',
-    role: 'Barangay Official',
-    status: 'active',
-  },
-  {
-    gmail: 'johndoe@gmail.com',
-    role: 'Admin',
-    status: 'inactive',
-  },
-  {
-    gmail: 'johndoe@gmail.com',
-    role: 'MDRRMO Officer',
-    status: 'active',
-  },
-]
-
-const columns: ColumnDef<Users>[] = [
-  {
-    accessorKey: 'gmail',
+    accessorKey: 'email',
     header: 'Gmail',
     meta: {
       class: {
