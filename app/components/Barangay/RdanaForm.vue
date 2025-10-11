@@ -1,6 +1,6 @@
 
 <template>
-  <div class="">
+  <div class="" id="rdana-form">
     <h1 class="text-2xl md:text-3xl font-bold text-primary">
       RAPID DAMAGE ASSESSMENT AND NEEDS ANALYSIS (RDANA)
     </h1>
@@ -821,7 +821,7 @@
 
       <div class="flex items-center justify-end gap-3">
         <UButton color="info" variant="soft" @click="onReset">Reset</UButton>
-        <UButton color="primary" icon="i-heroicons-check-circle" type="submit">Submit RDANA Form</UButton>
+        <UButton color="primary" icon="i-heroicons-check-circle" @click="downloadPdf" type="submit">Submit RDANA Form</UButton>
       </div>
     </UCard>
     </UForm>
@@ -832,6 +832,8 @@
 import { storeToRefs } from 'pinia'
 // import FirstPartForm from './RDANA/FirstPartForm.vue'
 import { useRDANAFormStore } from '~/stores/useRDANAFormStore'
+const { $html2pdf } = useNuxtApp();
+// import html2pdf from 'html2pdf.js';
 import {
   ACCESS_MEANS,
   ROAD_STATUS,
@@ -855,6 +857,7 @@ import {
   COMMUNITY_INFO_WANT,
   COMMUNITY_MAIN_SOURCES,
 } from '~/models/rdana'
+import { usePdf } from '~/composables/usePdf';
 
 const rdanaStore = useRDANAFormStore()
 const { form } = storeToRefs(rdanaStore)
@@ -927,11 +930,19 @@ function onSubmit(e?: Event) {
   const v = rdanaStore.validate()
   errors.value = v.errors
   if (!v.valid) return
-
+  // var element = document.getElementById('rdana-form');
+  // html2pdf(element!);
   // In a real app, submit form.asJSON to API
   // For now, log to console
   // eslint-disable-next-line no-console
   console.log('RDANA SUBMISSION', rdanaStore.asJSON)
 }
+
+// ✅ PDF download logic
+const downloadPdf = async () => {
+  const element = document.getElementById('rdana-form');
+  if (!element) return;
+  await usePdf(element)
+};
 </script>
 
