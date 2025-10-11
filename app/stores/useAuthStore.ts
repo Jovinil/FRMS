@@ -21,12 +21,13 @@ const emailSchema = z.object({
 
 export const useAuthStore = defineStore('auth', {
     state: () =>  ({
-        user: null as User | null
+        user: null as User | null,
+        users: [] as User[]
     }),
     
     actions: {
         createAccount (name : string, email : string, password : string, role : 'ADMIN' | 'BARANGAY_OFFICIAL' | 'MDRRMO') {
-            console.log(role)
+
             const validated = createAccountSchema.safeParse({name, email, password, role});
 
             if(!validated.success){
@@ -42,6 +43,9 @@ export const useAuthStore = defineStore('auth', {
             }catch(error){
                 console.log(`${error} occured while trying to create account`)
             }
+        },
+        setUser(tempUser: User){
+            this.user = tempUser
         },
 
         async login(email?: string) {
@@ -77,6 +81,14 @@ export const useAuthStore = defineStore('auth', {
                 console.log(`${error} occured`);
             }
              
+        },
+        async fetchUsers(){
+            try{
+                const request = await $fetch('/api/user/users')
+                this.users = SuperJSON.deserialize(request.data)
+            }catch(error){
+                console.log(`${error} occured`)
+            }
         }
     }
 })
