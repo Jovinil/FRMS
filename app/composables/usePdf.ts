@@ -1,63 +1,99 @@
 import html2canvasPro from 'html2canvas-pro'
 import { jsPDF } from 'jspdf'
 
-/**
- * Converts a tall HTML element into a paginated PDF.
- * Works with Tailwind v4 colors (OKLCH) via html2canvas-pro.
- */
 export async function usePdf(el: HTMLElement, filename = 'form.pdf') {
-  if (!el) {
-    console.error('❌ usePdf: Element not found.')
-    return
-  }
+  if (!el) return console.error('❌ usePdf: Element not found.')
 
   try {
-    // Wait for fonts and images
     await document.fonts.ready
     await Promise.all(
       Array.from(el.querySelectorAll('img')).map(
         img =>
           img.complete ||
-          new Promise(resolve => {
-            img.onload = img.onerror = resolve
-          }),
+          new Promise(resolve => (img.onload = img.onerror = resolve)),
       ),
     )
 
-    // Render the entire element (not just viewport)
+    // 🩹 Only fix input + textarea rendering (not radios/checkboxes)
+    const fields = el.querySelectorAll('input, textarea')
+    const clones: HTMLElement[] = []
+
+    fields.forEach(field => {
+      const value =
+        (field as HTMLInputElement).value ||
+        (field as HTMLTextAreaElement).value ||
+        ''
+      const rect = field.getBoundingClientRect()
+      const style = getComputedStyle(field)
+
+      // Create a visible overlay with the same style and text
+      const clone = document.createElement('div')
+      clone.textContent = value
+      clone.style.position = 'absolute'
+      clone.style.left = `${rect.left + window.scrollX}px`
+      clone.style.top = `${rect.top + window.scrollY}px`
+      clone.style.width = `${rect.width}px`
+      clone.style.height = `${rect.height}px`
+      clone.style.font = style.font
+      clone.style.fontSize = style.fontSize
+      clone.style.fontFamily = style.fontFamily
+      clone.style.color = style.color
+      clone.style.padding = style.padding
+      clone.style.border = style.border
+      clone.style.borderRadius = style.borderRadius
+      clone.style.background = style.backgroundColor
+      clone.style.lineHeight = style.lineHeight
+      clone.style.display = 'flex'
+      clone.style.alignItems = 'center'
+      clone.style.justifyContent = style.textAlign || 'flex-start'
+      clone.style.whiteSpace = 'pre'
+      clone.style.overflow = 'hidden'
+      clone.style.zIndex = '9999'
+
+      // Hide the real input temporarily
+      // field.style.visibility = 'hidden'
+      document.body.appendChild(clone)
+      clones.push(clone)
+    })
+
+    // Render to canvas (everything else untouched)
     const canvas = await html2canvasPro(el, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
       windowWidth: el.scrollWidth,
-      windowHeight: el.scrollHeight, // ensure full height render
+      windowHeight: el.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
     })
 
+    // Remove clones + restore visibility
+    // fields.forEach(f => (f.style.visibility = 'visible'))
+    clones.forEach(c => c.remove())
+
+    // Generate PDF
     const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
-
-    // Calculate how many pages are needed
-    const imgWidth = pageWidth
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
+    const margin = 36
+    const usableWidth = pageWidth - margin * 2
+    const imgHeight = (canvas.height * usableWidth) / canvas.width
 
     let heightLeft = imgHeight
-    let position = 0
+    let position = margin
 
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
+    pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight)
+    heightLeft -= pageHeight - margin * 2
 
-    // Add extra pages if needed
     while (heightLeft > 0) {
-      position = heightLeft - imgHeight
+      position = heightLeft - imgHeight + margin
       pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
+      pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight)
+      heightLeft -= pageHeight - margin * 2
     }
 
     pdf.save(filename)

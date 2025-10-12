@@ -19,6 +19,8 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',
     // 'mapbox-gl/dist/mapbox-gl.css',
     // '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
+    
+    '@/assets/css/pdf-form.css',
   ],
 
     runtimeConfig: {

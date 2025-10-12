@@ -1,6 +1,6 @@
 
 <template>
-  <div class="" id="rdana-form">
+  <div class="py-3" id="rdana-form">
     <h1 class="text-2xl md:text-3xl font-bold text-primary">
       RAPID DAMAGE ASSESSMENT AND NEEDS ANALYSIS (RDANA)
     </h1>
@@ -819,7 +819,7 @@
       </div>
 
 
-      <div class="flex items-center justify-end gap-3">
+      <div class="flex items-center justify-end gap-3 mt-3">
         <UButton color="info" variant="soft" @click="onReset">Reset</UButton>
         <UButton color="primary" icon="i-heroicons-check-circle" @click="downloadPdf" type="submit">Submit RDANA Form</UButton>
       </div>
