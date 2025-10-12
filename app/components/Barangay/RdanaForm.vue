@@ -935,14 +935,15 @@ function onSubmit(e?: Event) {
   // In a real app, submit form.asJSON to API
   // For now, log to console
   // eslint-disable-next-line no-console
-  console.log('RDANA SUBMISSION', rdanaStore.asJSON)
+  // console.log('RDANA SUBMISSION', rdanaStore.asJSON)
 }
 
 // ✅ PDF download logic
 const downloadPdf = async () => {
+  await rdanaStore.store()
   const element = document.getElementById('rdana-form');
-  if (!element) return;
-  await usePdf(element)
+  // if (!element) return;
+// await usePdf(element)
 };
 </script>
 
