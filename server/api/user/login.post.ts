@@ -12,6 +12,12 @@ export default defineEventHandler(async (event) => {
     const user = await prisma.user.findFirst({
         where: {
             email:  validated.data?.email
+        },
+        include: {
+            rapidDamageAssessmentNeedAnalysisReport: true,
+            damageAssessmentNeedAnalysisReport: true,
+            generatedReports: true,
+            floodRiskMap: true
         }
     });
 
