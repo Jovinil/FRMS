@@ -344,24 +344,24 @@ const schema = z.object({
 // Submit handler
 const onSubmit = async () => {
   // store.validateForm() returns boolean (true if valid)
-  const valid = store.validateForm()
-  if (!valid) {
-    // show errors stored in store.errors
-    // keep message short — UI alert/toast recommended in real app
-    // eslint-disable-next-line no-alert
-    alert('Please fix validation errors:\n' + (store.errors || []).join('\n'))
-    return
-  }
+  // const valid = store.validateForm()
+  // if (!valid) {
+  //   // show errors stored in store.errors
+  //   // keep message short — UI alert/toast recommended in real app
+  //   // eslint-disable-next-line no-alert
+  //   alert('Please fix validation errors:\n' + (store.errors || []).join('\n'))
+  //   return
+  // }
 
   // call the store's saveForm() (placeholder; replace with real persistence)
   const saved = await store.saveForm()
-  if (saved) {
-    // eslint-disable-next-line no-alert
-    alert('✅ DANA form successfully saved!')
-  } else {
-    // eslint-disable-next-line no-alert
-    alert('Unable to save form. Fix validation errors first.')
-  }
+  // if (saved) {
+  //   // eslint-disable-next-line no-alert
+  //   alert('✅ DANA form successfully saved!')
+  // } else {
+  //   // eslint-disable-next-line no-alert
+  //   alert('Unable to save form. Fix validation errors first.')
+  // }
 }
 
 // Reset

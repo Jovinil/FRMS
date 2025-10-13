@@ -31,8 +31,9 @@ model User {
 model Barangay {
   id Int @id @default(autoincrement())
   name String
-  population BigInt
+  population Int
   location String
+  elevation Decimal
   longitude Decimal
   latitude Decimal
   evacuationCenters EvacuationCenter[]
@@ -90,6 +91,8 @@ model RapidDamageAssessmentNeedAnalysisReport {
   status String
   summary String
   userId Int
+  totalDisplaced Int
+  totalDamage Int
   user User @relation(fields: [userId], references: [id])
   barangayId Int
   barangay Barangay @relation(fields: [barangayId], references: [id])
