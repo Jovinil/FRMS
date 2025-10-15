@@ -2,13 +2,15 @@ import type { User } from "@prisma/client"
 import SuperJSON from "superjson"
 import z from "zod"
 
-const createAccountSchema = z.object({
+const barangayOfficialSchema = z.object({
     name: z.string(),
     email: z.string().email(),
     password: z.string(),
+    barangay: z.string(),
     role: z.enum(['ADMIN', 'BARANGAY_OFFICIAL', 'MDRRMO'])
-
 })
+
+const createAccountSchema = barangayOfficialSchema.omit({barangay: true})
 
 const emailSchema = z.object({
     email: z.string().email()
@@ -26,9 +28,14 @@ export const useAuthStore = defineStore('auth', {
     }),
     
     actions: {
-        createAccount (name : string, email : string, password : string, role : 'ADMIN' | 'BARANGAY_OFFICIAL' | 'MDRRMO') {
+        createAccount (name : string, email : string, password : string, role : 'ADMIN' | 'BARANGAY_OFFICIAL' | 'MDRRMO', barangay : string | null = null) {
+            let validated;
+            if(role !== 'BARANGAY_OFFICIAL'){
+                validated = createAccountSchema.safeParse({name, email, password, role});
+            }else {
+                validated = barangayOfficialSchema.safeParse({name, email, barangay, password, role})
+            }
 
-            const validated = createAccountSchema.safeParse({name, email, password, role});
 
             if(!validated.success){
                 console.log(validated.error.issues);

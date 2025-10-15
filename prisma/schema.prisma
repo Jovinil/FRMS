@@ -24,7 +24,8 @@ model User {
   floodRiskMap FLoodRiskMap[]
   damageAssessmentNeedAnalysisReport DamageAssessmentNeedAnalysisReport[]
   rapidDamageAssessmentNeedAnalysisReport RapidDamageAssessmentNeedAnalysisReport[]
-
+  barangayId Int?
+  barangay Barangay? @relation(fields: [barangayId], references: [id])
   createdAt DateTime @default(now())
 }
 
@@ -36,6 +37,7 @@ model Barangay {
   elevation Decimal
   longitude Decimal
   latitude Decimal
+  users User[]
   evacuationCenters EvacuationCenter[]
   floodRiskMap FLoodRiskMap[]
   damageAssessmentNeedAnalysisReport DamageAssessmentNeedAnalysisReport[]
