@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore()
 
   // 🟢 Public routes (no auth needed)
-  const publicRoutes = ['/login', '/register', '/forgot-password', '/logout']
+  const publicRoutes = ['/login', '/register', '/forgot-password', '/logout', '/createAccount']
   if (publicRoutes.includes(to.path)) return
 
   // 🧠 Restore Supabase session (prevents logout on refresh)
