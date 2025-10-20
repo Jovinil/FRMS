@@ -3,8 +3,7 @@
   <div class="p-6 space-y-10">
     <!-- Header -->
     <header class="text-center space-y-1">
-      <h1 class="text-3xl font-bold text-primary">🌀 DANA Rapid Damage Assessment Form</h1>
-      <p class="text-gray-500">For Local DRRM and Response Teams</p>
+      <h1 class="text-3xl font-bold text-primary">DANA Rapid Damage Assessment Form</h1>
     </header>
 
     <!-- Bind directly to the Pinia store's form -->
