@@ -28,6 +28,7 @@ const adminMenu = [
   { label: "Dashboard", to: "/admin/" },
   { label: "User Management", to: "/admin/userManagement" },
   { label: "RDANA/DANA", to: "/admin/rdana" },
+  { label: "Create Account", to: "admin/createAccount" },
   { label: "Generate Report", to: "/admin/generateReport" },
   { label: "Logout", to: "/logout" }
 ]
