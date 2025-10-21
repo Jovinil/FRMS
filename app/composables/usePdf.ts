@@ -14,7 +14,7 @@ export async function usePdf(el: HTMLElement, filename = 'form.pdf') {
       ),
     )
 
-    // 🩹 Only fix input + textarea rendering (not radios/checkboxes)
+    // 🩹 Fix inputs + textareas for PDF clarity
     const fields = el.querySelectorAll('input, textarea')
     const clones: HTMLElement[] = []
 
@@ -26,9 +26,9 @@ export async function usePdf(el: HTMLElement, filename = 'form.pdf') {
       const rect = field.getBoundingClientRect()
       const style = getComputedStyle(field)
 
-      // Create a visible overlay with the same style and text
+      // Create overlay clone that visually mimics the real input
       const clone = document.createElement('div')
-      clone.textContent = value
+      clone.textContent = value || ' '
       clone.style.position = 'absolute'
       clone.style.left = `${rect.left + window.scrollX}px`
       clone.style.top = `${rect.top + window.scrollY}px`
@@ -43,20 +43,24 @@ export async function usePdf(el: HTMLElement, filename = 'form.pdf') {
       clone.style.borderRadius = style.borderRadius
       clone.style.background = style.backgroundColor
       clone.style.lineHeight = style.lineHeight
+      clone.style.boxSizing = style.boxSizing
+      clone.style.whiteSpace = 'pre'
       clone.style.display = 'flex'
       clone.style.alignItems = 'center'
-      clone.style.justifyContent = style.textAlign || 'flex-start'
-      clone.style.whiteSpace = 'pre'
+      clone.style.justifyContent = 
+        style.textAlign === 'center'
+          ? 'center'
+          : style.textAlign === 'right'
+          ? 'flex-end'
+          : 'flex-start'
       clone.style.overflow = 'hidden'
       clone.style.zIndex = '9999'
 
-      // Hide the real input temporarily
-      // field.style.visibility = 'hidden'
       document.body.appendChild(clone)
       clones.push(clone)
     })
 
-    // Render to canvas (everything else untouched)
+    // Render the DOM to canvas
     const canvas = await html2canvasPro(el, {
       scale: 3,
       useCORS: true,
@@ -69,11 +73,10 @@ export async function usePdf(el: HTMLElement, filename = 'form.pdf') {
       scrollY: 0,
     })
 
-    // Remove clones + restore visibility
-    // fields.forEach(f => (f.style.visibility = 'visible'))
+    // Cleanup
     clones.forEach(c => c.remove())
 
-    // Generate PDF
+    // Generate paginated PDF
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
 

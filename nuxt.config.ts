@@ -20,8 +20,14 @@ export default defineNuxtConfig({
     // 'mapbox-gl/dist/mapbox-gl.css',
     // '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
     
-    '@/assets/css/pdf-form.css',
+    // '@/assets/css/pdf-form.css',
   ],
+  postcss: {
+    plugins: {
+      '@tailwindcss/postcss': {},
+      autoprefixer: {},
+    },
+  },
 
     runtimeConfig: {
     public: {
