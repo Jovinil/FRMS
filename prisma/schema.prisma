@@ -48,12 +48,14 @@ model Barangay {
 model EvacuationCenter {
   id Int @id @default(autoincrement())
   name String
-  address String
+  // address String
+  longitude Decimal
+  latitude Decimal
   capacity Int
   barangayId Int
   barangay Barangay @relation(fields: [barangayId], references: [id])
-  evacueesReportId Int
-  evacueesReport EvacueesReport @relation(fields: [evacueesReportId], references: [id])
+  evacueesReportId Int?
+  evacueesReport EvacueesReport? @relation(fields: [evacueesReportId], references: [id])
   createdAt DateTime @default(now())
 }
 
@@ -93,6 +95,11 @@ model RapidDamageAssessmentNeedAnalysisReport {
   status String
   summary String
   userId Int
+  priority String
+  affectedFamilies Int
+  totalCasualties Int
+  infrastructureDamage Int
+  immediateNeeds String[]
   totalDisplaced Int
   totalDamage Int
   user User @relation(fields: [userId], references: [id])

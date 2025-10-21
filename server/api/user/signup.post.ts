@@ -61,5 +61,5 @@ export default defineEventHandler(async (event) => {
             // password: validated.data.password,
             // role: validated.data.role,
 
-    console.log('sucesss')
+    return { message: "Account successfully created" }
 })

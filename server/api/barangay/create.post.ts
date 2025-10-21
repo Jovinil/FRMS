@@ -12,7 +12,6 @@ const BarangaySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   try {
-    // ✅ Parse and validate incoming body
     const body = await readBody(event)
     const validated = BarangaySchema.safeParse(body)
 
@@ -26,7 +25,6 @@ export default defineEventHandler(async (event) => {
 
     const { name, population, location, elevation, longitude, latitude } = validated.data
 
-    // ✅ Create Barangay in DB
     const barangay = await prisma.barangay.create({
       data: {
         name,
