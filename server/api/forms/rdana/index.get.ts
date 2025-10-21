@@ -2,7 +2,6 @@ import superjson from 'superjson'
 
 export default defineEventHandler(async (event) => {
 
-  // Fetch the user from Prisma by email
   const rdana = await prisma.rapidDamageAssessmentNeedAnalysisReport.findMany({
     include: {
         barangay: true,
