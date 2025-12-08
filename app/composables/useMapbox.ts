@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue"
 import "mapbox-gl/dist/mapbox-gl.css"
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
+import * as turf from "@turf/turf"
 
 export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContainer: Ref<HTMLElement | null>) {
   const map = ref<any>(null)
@@ -59,6 +60,14 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
       const { center, place_name } = e.result
       const [lng, lat] = center
       
+      if (!isWithinBoundary(lng, lat)) {
+        new mapboxgl.value.Popup()
+          .setLngLat([lng, lat])
+          .setHTML(`<div style="padding: 10px; max-width: 180px;">Location is outside the boundary.</div>`)
+          .addTo(map.value)
+        return
+      }
+
       await showElevationInfo(lng, lat, place_name)
     })
 
@@ -68,6 +77,7 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
 
     // Wait for map to load
     map.value.on('load', () => {
+      addBoundaryLayer()
       addStaticFloodRiskVisualization()
       enableElevationQuery()
     })
@@ -77,6 +87,85 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
       if (map.value) map.value.resize()
     })
   })
+
+  const addBoundaryLayer = () => {
+    if (!map.value) return
+
+    if (!map.value.getSource('boundary')) {
+      map.value.addSource('boundary', {
+        type: 'vector',
+        url: BOUNDARY_TILESET_ID,
+      })
+    }
+
+    if (!map.value.getLayer('boundary-fill')) {
+      map.value.addLayer({
+        id: 'boundary-fill',
+        type: 'fill',
+        source: 'boundary',
+        'source-layer': BOUNDARY_SOURCE_LAYER,
+        paint: {
+          'fill-color': 'rgba(37, 99, 235, 0.12)', // light blue tint to show dataset area
+          'fill-outline-color': '#2563eb',
+        },
+      })
+    }
+
+    if (!map.value.getLayer('boundary-line')) {
+      map.value.addLayer({
+        id: 'boundary-line',
+        type: 'line',
+        source: 'boundary',
+        'source-layer': BOUNDARY_SOURCE_LAYER,
+        paint: {
+          'line-color': '#2563eb',
+          'line-width': 2.5,
+        },
+      })
+    }
+
+    // Once tiles are available, capture the polygon geometry for point-in-polygon checks
+    map.value.once('idle', () => {
+      const features = map.value?.querySourceFeatures('boundary', { sourceLayer: BOUNDARY_SOURCE_LAYER }) ?? []
+      const match = features.find((f: any) => f?.geometry?.type === 'Polygon' || f?.geometry?.type === 'MultiPolygon')
+      if (match) {
+        const feature = match.toJSON ? match.toJSON() : { type: 'Feature', properties: match.properties ?? {}, geometry: match.geometry }
+        boundaryPolygon.value = feature
+        boundaryLoaded.value = true
+        console.log('Boundary loaded from dataset', feature)
+        applyBoundaryMaskToLayers()
+      }
+    })
+  }
+
+  const isWithinBoundary = (lng: number, lat: number) => {
+    if (!boundaryPolygon.value) return false
+    return turf.booleanPointInPolygon([lng, lat], boundaryPolygon.value as any)
+  }
+
+  const applyBoundaryMaskToLayers = () => {
+    if (!map.value || !boundaryPolygon.value) return
+    const polygonFeature =
+      boundaryPolygon.value.type === 'Feature'
+        ? boundaryPolygon.value
+        : { type: 'Feature', properties: {}, geometry: boundaryPolygon.value }
+
+    // Limit contour layers to polygon
+    if (map.value.getLayer('flood-risk-contours')) {
+      map.value.setFilter('flood-risk-contours', ['within', ['literal', polygonFeature]])
+    }
+    if (map.value.getLayer('contour-labels')) {
+      map.value.setFilter('contour-labels', ['within', ['literal', polygonFeature]])
+    }
+
+    // Keep the view constrained to reduce work outside the area
+    try {
+      const bounds = turf.bbox(polygonFeature) as any
+      map.value.setMaxBounds(bounds)
+    } catch (err) {
+      console.warn('Could not set max bounds from boundary', err)
+    }
+  }
 
   const addStaticFloodRiskVisualization = () => {
     if (!map.value) return
@@ -321,6 +410,14 @@ export function useMapbox(mapContainer: Ref<HTMLElement | null>, geocoderContain
 
     map.value.on('click', async (e: any) => {
       const { lng, lat } = e.lngLat
+
+      if (!isWithinBoundary(lng, lat)) {
+        new mapboxgl.value.Popup()
+          .setLngLat([lng, lat])
+          .setHTML(`<div style="padding: 10px; max-width: 180px;">Select a point inside the boundary area.</div>`)
+          .addTo(map.value)
+        return
+      }
       
       // Reverse geocode to get address
       const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${config.public.mapboxToken}`

@@ -37,7 +37,7 @@ const MDRRMOMenu = [
   { label: "Dashboard", to: "/mdrrmo/" },
   { label: "Generate Report", to: "/mdrrmo/report" },
   { label: "Map", to: "/mdrrmo/map" },
-  { label: "RDANA/DANA", to: "/mdrrmo/reports" },
+  { label: "RDANA/DANA", to: "/mdrrmo/rdana/form-1" },
   { label: "Logout", to: "/logout" }
 ]
 

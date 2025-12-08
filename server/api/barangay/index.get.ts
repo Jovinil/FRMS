@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     include: {
         damageAssessmentNeedAnalysisReport: true,
         rapidDamageAssessmentNeedAnalysisReport: true,
-        evacuationCenters: true,
+        // evacuationCenters: true,
         floodRiskMap: true
     }
   })
