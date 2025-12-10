@@ -22,6 +22,9 @@ export default defineNuxtConfig({
     
     // '@/assets/css/pdf-form.css',
   ],
+  
+  plugins: ['~/plugins/mapbox.client'],
+
   postcss: {
     plugins: {
       '@tailwindcss/postcss': {},
@@ -32,6 +35,8 @@ export default defineNuxtConfig({
     runtimeConfig: {
     public: {
       mapboxToken: process.env.NUXT_PUBLIC_MAPBOX_TOKEN,
+      mapboxStyleUrl: process.env.NUXT_PUBLIC_MAPBOX_STYLE_URL,
+      mapboxBoundaryTileset: process.env.NUXT_PUBLIC_MAPBOX_BOUNDARY_TILESET_ID,
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY
     }
