@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
                         navigateTo('/admin')
                         break;
                     case 'BARANGAY_OFFICIAL':
-                        navigateTo('/barangay/first-barangay-form-i')
+                        navigateTo('/barangay')
                         break;
                     case 'MDRRMO':
                         navigateTo('/mdrrmo')
