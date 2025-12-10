@@ -24,8 +24,15 @@ export const useRdanaFormStore = defineStore('rdanaForm', () => {
 
   // placeholder for DB integration
   async function saveToApi() {
-    // await $fetch('/api/rdana-form', { method: 'POST', body: form.value })
-  }
+    const result = await $fetch('/api/forms/first/create', {
+      method: 'POST',
+      body: form.value,
+    });
+
+    // result is a FirstRdanaSubmission (id, createdAt, etc.)
+    navigateTo('/mdrrmo');
+    return result;
+}
 
   return {
     form,

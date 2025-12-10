@@ -13,6 +13,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model FirstRdanaSubmission {
+  id                 String      @id @default(cuid())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  submittedAt        DateTime?
+  submittedByAuthId  String?     // Supabase user id (auth.users.id)
+
+  // Each page’s data as JSON (match your RdanaStep*.vue structure)
+  profileMission              Json?
+  initialImpact               Json?
+  healthNutrition             Json?
+  accessibilityPower          Json?
+  communicationsEvac          Json?
+  foodWaterSanitation         Json?
+  lawOrderShelter             Json?
+  livelihoodEngagementOverall Json?
+  protectionEducation         Json?
+  reliefSrr                   Json?
+  submittedBy                 Json? // last page (RdanaStepSubmittedBy.vue)
+}
+
 model User {
   id Int @id @default(autoincrement())
   name String
