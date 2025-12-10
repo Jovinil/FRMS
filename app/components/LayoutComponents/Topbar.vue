@@ -31,10 +31,9 @@ const menuItems = ref<DropdownMenuItem[][]>([
     {
       label: 'Profile',
       icon: 'i-lucide-user',
-      onSelect() {
-        router.push('/profile')
-      },
-    },
+      type: 'link',
+      to: '/profile'     // ← this is what does the redirect
+    }
   ],
   [
     {
@@ -44,7 +43,7 @@ const menuItems = ref<DropdownMenuItem[][]>([
       onSelect() {
         // TODO: replace with real logout call
         // await $fetch('/api/auth/logout', { method: 'POST' })
-        router.push('/login')
+        router.push('/logout')
       },
     },
   ],
