@@ -2,12 +2,16 @@
   "name": "nuxt-app",
   "type": "module",
   "private": true,
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "seed": "prisma db seed"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.1.2",

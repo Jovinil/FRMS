@@ -30,9 +30,8 @@ export const useFirstBarangayFormStore = defineStore('firstBarangayForm', () => 
       })
 
 
-      router.go(0); // refresh the page
       success('Barangay Form submitted successfully.');
-      await navigateTo('/barangay/first-barangay-form-i')
+      await navigateTo('/barangay')
     } catch (e) {
       console.error(e)
       error('Failed to submit First RDANA Form.')

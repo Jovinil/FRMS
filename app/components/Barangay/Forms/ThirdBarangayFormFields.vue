@@ -1,14 +1,39 @@
 <!-- components/rdana/ThirdBarangayFormFields.vue -->
 <script setup lang="ts">
-import { useThirdBarangayFormStore } from '~/stores/useThirdBarangayForm';
+import { onMounted } from 'vue'
+import { useThirdBarangayFormStore } from '~/stores/useThirdBarangayForm'
 
-const store = useThirdBarangayFormStore();
-const form = store.form;
+const store = useThirdBarangayFormStore()
+const form = store.form
 
 const yesNoItems = [
   { label: 'Yes', value: 'yes' },
   { label: 'No', value: 'no' },
-];
+]
+
+// helper to format current datetime as "YYYY-MM-DD HH:mm"
+function formatNowForInput() {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  const year = now.getFullYear()
+  const month = pad(now.getMonth() + 1)
+  const day = pad(now.getDate())
+  const hour = pad(now.getHours())
+  const minute = pad(now.getMinutes())
+
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+onMounted(() => {
+  // Only set defaults if user hasn't typed anything yet
+  if (!form.profileOfDisaster.dateTimeOfOccurrence) {
+    form.profileOfDisaster.dateTimeOfOccurrence = formatNowForInput()
+  }
+  if (!form.profileOfDisaster.dateTimeOfReport) {
+    form.profileOfDisaster.dateTimeOfReport = formatNowForInput()
+  }
+})
 </script>
 
 <template>
@@ -34,6 +59,7 @@ const yesNoItems = [
           <UInput
             v-model="form.profileOfDisaster.dateTimeOfOccurrence"
             placeholder="YYYY-MM-DD HH:mm"
+            :readonly="true"
           />
         </UFormField>
 
@@ -45,6 +71,7 @@ const yesNoItems = [
           <UInput
             v-model="form.profileOfDisaster.dateTimeOfReport"
             placeholder="YYYY-MM-DD HH:mm"
+            :readonly="true"
           />
         </UFormField>
       </div>
@@ -231,11 +258,7 @@ const yesNoItems = [
         </div>
       </div>
 
-      <!-- 5 & 6 & 7 tables -->
-      <!-- For damaged properties, damaged lifelines, and agriculture sections,
-           follow the same pattern: UFormField with number inputs bound to
-           summaryOfEffects.damagedProperties.*, summaryOfEffects.damagedLifelines.*,
-           summaryOfEffects.agriculture.* as per the model. -->
+      <!-- 5 & 6 & 7 tables: (same as before, unchanged) -->
     </section>
 
     <!-- C. Local Actions -->
@@ -413,7 +436,6 @@ const yesNoItems = [
         </UFormField>
       </div>
 
-      <!-- Table of evacuation centers (5 rows) -->
       <div class="space-y-2">
         <p class="font-medium text-sm">
           Name of evacuation centers, number of families and persons

@@ -1,4 +1,5 @@
 <template>
+
   <div class="flex flex-col h-screen max-h-screen overflow-hidden relative">
     <LayoutComponentsTopbar />
     <div class="flex flex-1 overflow-hidden">

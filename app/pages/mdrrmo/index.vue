@@ -1,45 +1,15 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { h, resolveComponent } from 'vue'
+import { h, resolveComponent, onMounted } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-
-type MdrrmoFormRow = {
-  id: number
-  referenceCode: string
-  incidentId: number
-  incidentType: string
-  barangay: string
-  incidentDatetime: string
-  deadlineAt: string
-  submittedAt: string | null
-}
+import {
+  useMdrrmoFirstRdanaStore,
+  type MdrrmoFormRow,
+} from '~/stores/useMdrrmoFirstRdanaStore'
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 
-// 🔹 static sample data
-const rows = ref<MdrrmoFormRow[]>([
-  {
-    id: 1,
-    referenceCode: 'INC-2025-001',
-    incidentId: 1,
-    incidentType: 'Flooding',
-    barangay: 'Barangay 1',
-    incidentDatetime: '2025-12-10T08:00:00Z',
-    deadlineAt: '2025-12-13T08:00:00Z',
-    submittedAt: null,
-  },
-  {
-    id: 2,
-    referenceCode: 'INC-2025-002',
-    incidentId: 2,
-    incidentType: 'Fire',
-    barangay: 'Barangay 2',
-    incidentDatetime: '2025-12-08T10:00:00Z',
-    deadlineAt: '2025-12-11T10:00:00Z',
-    submittedAt: '2025-12-10T09:30:00Z',
-  },
-])
+const store = useMdrrmoFirstRdanaStore()
 
 function getStatus(deadline: string, submittedAt: string | null) {
   if (submittedAt) return { color: 'success', label: 'Submitted' }
@@ -68,20 +38,10 @@ function formatTimeRemaining(deadline: string) {
   return `${hours}h`
 }
 
-// ✅ Nuxt UI v3+ style columns
 const columns: TableColumn<MdrrmoFormRow>[] = [
-  {
-    accessorKey: 'referenceCode',
-    header: 'Ref. Code',
-  },
-  {
-    accessorKey: 'incidentType',
-    header: 'Incident Type',
-  },
-  {
-    accessorKey: 'barangay',
-    header: 'Barangay',
-  },
+  { accessorKey: 'referenceCode', header: 'Ref. Code' },
+  { accessorKey: 'incidentType', header: 'Incident Type' },
+  { accessorKey: 'barangay', header: 'Barangay' },
   {
     accessorKey: 'incidentDatetime',
     header: 'Incident Date/Time',
@@ -145,18 +105,16 @@ const columns: TableColumn<MdrrmoFormRow>[] = [
   },
 ]
 
-const total = computed(() => rows.value.length)
-const overdue = computed(() =>
-  rows.value.filter((r) => getStatus(r.deadlineAt, r.submittedAt).label === 'Overdue').length,
-)
-const submitted = computed(() => rows.value.filter((r) => r.submittedAt).length)
+onMounted(() => {
+  store.fetchRows()
+})
 </script>
 
 <template>
   <UPage>
     <UPageHeader
-      title="MDRRMO Dashboard (Static)"
-      description="Static view of MDRRMO incident forms with a 72-hour deadline."
+      title="MDRRMO Dashboard – RDANA 72h"
+      description="Live RDANA Form 1 submissions with 72-hour deadlines."
     />
 
     <UPageBody>
@@ -165,19 +123,19 @@ const submitted = computed(() => rows.value.filter((r) => r.submittedAt).length)
           <div>
             <p class="text-sm text-gray-500">Total Forms</p>
             <p class="text-2xl font-semibold">
-              {{ total }}
+              {{ store.total }}
             </p>
           </div>
           <div>
             <p class="text-sm text-gray-500">Overdue</p>
             <p class="text-2xl font-semibold text-red-600">
-              {{ overdue }}
+              {{ store.overdue }}
             </p>
           </div>
           <div>
             <p class="text-sm text-gray-500">Submitted</p>
             <p class="text-2xl font-semibold text-emerald-600">
-              {{ submitted }}
+              {{ store.submitted }}
             </p>
           </div>
         </div>
@@ -185,11 +143,21 @@ const submitted = computed(() => rows.value.filter((r) => r.submittedAt).length)
 
       <UCard>
         <template #header>
-          <h2 class="text-lg font-semibold">Incident Forms</h2>
+          <h2 class="text-lg font-semibold">RDANA Form 1 Submissions</h2>
         </template>
 
-        <!-- 🔑 Nuxt UI v3: use :data, not :rows -->
-        <UTable :data="rows" :columns="columns" />
+        <UTable
+          :data="store.rows"
+          :columns="columns"
+          :loading="store.loading"
+        />
+
+        <p
+          v-if="store.error"
+          class="mt-2 text-sm text-red-500"
+        >
+          {{ store.error }}
+        </p>
       </UCard>
     </UPageBody>
   </UPage>

@@ -17,6 +17,7 @@ export const useRdanaFormStore = defineStore('rdanaForm', () => {
       ...form.value,
       ...partial,
     };
+     return { form, patchForm, /* ... */ }
   }
 
   function reset() {
