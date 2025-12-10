@@ -6,6 +6,8 @@ import { createDefaultFirstBarangayForm } from '~/models/firstBarangayForm';
 
 export const useFirstBarangayFormStore = defineStore('firstBarangayForm', () => {
   const form = ref<FirstBarangayForm>(createDefaultFirstBarangayForm());
+  const { success, error } = useFlash(); 
+  const router = useRouter();
 
   function setForm(newForm: FirstBarangayForm) {
     form.value = newForm;
@@ -17,11 +19,26 @@ export const useFirstBarangayFormStore = defineStore('firstBarangayForm', () => 
 
   // hook this to your API / DB
   async function saveToApi() {
-    // await $fetch('/api/rdana/first-barangay-form', {
-    //   method: 'POST',
-    //   body: form.value
-    // });
-  }
+    const payload = {
+      userId: String(useAuthStore().user?.id),
+      form: form.value
+    }
+    try {
+      const result = await $fetch('/api/forms/first-barangay/create', {
+        method: 'POST',
+        body: payload,
+      })
+
+
+      router.go(0); // refresh the page
+      success('Barangay Form submitted successfully.');
+      await navigateTo('/barangay/first-barangay-form-i')
+    } catch (e) {
+      console.error(e)
+      error('Failed to submit First RDANA Form.')
+      throw e
+    }
+}
 
   return {
     form,
@@ -30,3 +47,4 @@ export const useFirstBarangayFormStore = defineStore('firstBarangayForm', () => 
     saveToApi,
   };
 });
+

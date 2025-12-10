@@ -7,6 +7,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model FirstBarangayFormSubmission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submittedAt DateTime?
+
+  data        Json     // entire FirstBarangayForm from Pinia
+}
+
+model SecondBarangayFormSubmission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submittedAt DateTime?
+
+  data        Json     // entire SecondBarangayForm from Pinia
+}
+
+model ThirdBarangayFormSubmission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submittedAt DateTime?
+
+  data        Json     // entire ThirdBarangayForm from Pinia
+}
+
+model BarangayFormProgress {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // identify WHO this progress belongs to
+  // You can pick one:
+  // or, if you prefer per user:
+  userId      String @unique   // Supabase auth user id
+
+  latestFormNumber       Int          // 1, 2, or 3
+  latestFormSubmissionId String?      // id of the last submission (optional)
+  latestFormSubmittedAt  DateTime?
+}
+
 model FirstRdanaSubmission {
   id                          String    @id @default(cuid())
   createdAt                   DateTime  @default(now())
@@ -69,6 +114,17 @@ model EvacuationCenter {
   barangay         Barangay       @relation(fields: [barangayId], references: [id])
   evacueesReport   EvacueesReport @relation(fields: [evacueesReportId], references: [id])
 }
+// model EvacuationCenter {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   centerName String
+//   capacity   Int
+//   lng        Float
+//   lat        Float
+// }
+
 
 model GeneratedReport {
   id         Int      @id @default(autoincrement())

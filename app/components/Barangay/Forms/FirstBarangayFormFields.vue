@@ -1,5 +1,6 @@
 <!-- components/rdana/FirstBarangayFormFields.vue -->
 <script setup lang="ts">
+import authGlobal from '~/middleware/auth.global';
 import { useFirstBarangayFormStore } from '~/stores/useFirstBarangayStore';
 
 const store = useFirstBarangayFormStore();
@@ -9,6 +10,7 @@ const yesNoItems = [
   { label: 'Yes', value: 'yes' },
   { label: 'No', value: 'no' },
 ];
+
 </script>
 
 <template>

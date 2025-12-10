@@ -62,7 +62,6 @@ export const secondBarangayFormSchema = z.object({
   }),
 
   medicalHealth: z.object({
-    exactLocations: z.string().min(1, 'Required'),
     numberInjured: z.number().int().nonnegative().nullable(),
     displacedNeedingMedAttentionFamilies: z.number().int().nonnegative().nullable(),
     displacedNeedingMedAttentionPersons: z.number().int().nonnegative().nullable(),
@@ -76,7 +75,6 @@ export const secondBarangayFormSchema = z.object({
   }),
 
   shelterClothing: z.object({
-    exactLocations: z.string().min(1, 'Required'),
     requiringShelterClothingMale: z.number().int().nonnegative().nullable(),
     requiringShelterClothingFemale: z.number().int().nonnegative().nullable(),
     requiringShelterClothingInfants: z.number().int().nonnegative().nullable(),
@@ -87,7 +85,6 @@ export const secondBarangayFormSchema = z.object({
   }),
 
   food: z.object({
-    exactLocations: z.string().min(1, 'Required'),
     peopleRequiringFoodTotal: z.number().int().nonnegative().nullable(),
     peopleRequiringFoodInfants: z.number().int().nonnegative().nullable(),
     peopleRequiringFoodChildren: z.number().int().nonnegative().nullable(),
@@ -101,7 +98,6 @@ export const secondBarangayFormSchema = z.object({
   }),
 
   water: z.object({
-    exactLocations: z.string().min(1, 'Required'),
     peopleWithoutPotableWaterTotal: z.number().int().nonnegative().nullable(),
     peopleWithoutPotableWaterInfants: z.number().int().nonnegative().nullable(),
     peopleWithoutPotableWaterChildren: z.number().int().nonnegative().nullable(),
@@ -122,7 +118,6 @@ export const secondBarangayFormSchema = z.object({
   }),
 
   restorationOfLifelines: z.object({
-    exactLocations: z.string().min(1, 'Required'),
     conditionOfLifelineSystems: z.string().optional().default(''),
     operationalStatusAndEmergencyMeasures: z.string().optional().default(''),
     responseStatus: z.string().optional().default(''),

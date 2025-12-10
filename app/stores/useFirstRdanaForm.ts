@@ -6,6 +6,7 @@ import { createDefaultRdanaForm } from '~/models/firstRdanaForm';
 
 export const useRdanaFormStore = defineStore('rdanaForm', () => {
   const form = ref<RdanaForm>(createDefaultRdanaForm());
+  const { success, error } = useFlash();
 
   function setForm(newForm: RdanaForm) {
     form.value = newForm;
@@ -24,14 +25,20 @@ export const useRdanaFormStore = defineStore('rdanaForm', () => {
 
   // placeholder for DB integration
   async function saveToApi() {
-    const result = await $fetch('/api/forms/first/create', {
-      method: 'POST',
-      body: form.value,
-    });
+    try {
+      const result = await $fetch('/api/forms/first/create', {
+        method: 'POST',
+        body: form.value,
+      })
 
-    // result is a FirstRdanaSubmission (id, createdAt, etc.)
-    navigateTo('/mdrrmo');
-    return result;
+      success('RDANA Form submitted successfully.');
+      await navigateTo('/mdrrmo');
+      return result
+    } catch (e) {
+      console.error(e)
+      error('Failed to submit First RDANA Form.')
+      throw e
+    }
 }
 
   return {

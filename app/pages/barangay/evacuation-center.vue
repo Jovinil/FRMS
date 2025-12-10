@@ -3,10 +3,10 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const schema = z.object({
-  center_name: z.string().email('Invalid email'),
-  capacity: z.number().min(8, 'Must be at least 8 characters'),
-  lng: z.string(),
-  lat: z.string()
+  center_name: z.string(),
+  capacity: z.number(),
+  lng: z.number(),
+  lat: z.number()
 })
 
 type Schema = z.output<typeof schema>
@@ -36,19 +36,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                     <UInput v-model="state.center_name" />
                 </UFormField>
 
-                <UFormField label="Center Name" name="capacity">
-                    <UInput v-model="state.capacity" />
+                <UFormField label="Capacity" name="capacity">
+                    <UInput v-model.number="state.capacity" />
                 </UFormField>
 
                 <div class="flex flex-col gap-2">
                     <h2>Coordinates</h2>
                     <div class="flex gap-5">
                         <UFormField label="Longitude" name="lng">
-                            <UInput v-model="state.capacity" />
+                            <UInput v-model.number="state.lng" />
                         </UFormField>
                         
                         <UFormField label="Latitude" name="lat">
-                            <UInput v-model="state.capacity" />
+                            <UInput v-model.number="state.lat" />
                         </UFormField>
                     </div>                    
                 </div>
