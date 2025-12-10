@@ -1,9 +1,31 @@
 <!-- components/rdana/RdanaStepProfileMission.vue -->
 <script setup lang="ts">
-import { useRdanaFormStore } from '~/stores/useFirstRdanaForm';
+import { onMounted } from 'vue'
+import { useRdanaFormStore } from '~/stores/useFirstRdanaForm'
 
-const store = useRdanaFormStore();
-const form = store.form;
+const store = useRdanaFormStore()
+const form = store.form
+
+// helper to format current datetime as "YYYY-MM-DD HH:mm"
+function formatNowForInput() {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  const year = now.getFullYear()
+  const month = pad(now.getMonth() + 1)
+  const day = pad(now.getDate())
+  const hour = pad(now.getHours())
+  const minute = pad(now.getMinutes())
+
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+onMounted(() => {
+  // only set default if user hasn't typed anything yet
+  if (!form.profile.emergencyOperation.dateTimeOfEvent) {
+    form.profile.emergencyOperation.dateTimeOfEvent = formatNowForInput()
+  }
+})
 </script>
 
 <template>
@@ -39,6 +61,7 @@ const form = store.form;
         <UInput
           v-model="form.profile.emergencyOperation.dateTimeOfEvent"
           placeholder="YYYY-MM-DD HH:mm"
+          readonly
         />
       </UFormField>
     </section>

@@ -7,8 +7,8 @@ import { createDefaultThirdBarangayForm } from '~/models/thirdBarangayForm'
 export const useThirdBarangayFormStore = defineStore('thirdBarangayForm', () => {
   const form = ref<ThirdBarangayForm>(createDefaultThirdBarangayForm())
   const { success, error } = useFlash()
-  const router = useRouter();
-
+  const router = useRouter()
+  const auth = useAuthStore()
 
   function setForm(newForm: ThirdBarangayForm) {
     form.value = newForm
@@ -20,16 +20,27 @@ export const useThirdBarangayFormStore = defineStore('thirdBarangayForm', () => 
 
   async function saveToApi() {
     try {
+      const rawUserId = auth.user?.id
+      console.log('Third form userId:', rawUserId)
+
+      if (!rawUserId) {
+        error('You must be logged in to submit this form.')
+        return
+      }
+
+      const payload = {
+        userId: String(rawUserId),
+        form: form.value,
+      }
+
       const result = await $fetch('/api/forms/third-barangay/create', {
         method: 'POST',
-        body: form.value,
+        body: payload,
       })
 
-      router.go(0);
       success('Third Barangay Form submitted successfully.')
-      // optional redirect / reload here
-      await navigateTo('/barangay/third-barangay-form-iii')
 
+      await navigateTo('/barangay')
       return result
     } catch (e) {
       console.error(e)

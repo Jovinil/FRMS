@@ -1,52 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, h, resolveComponent } from 'vue'
+import { h, resolveComponent, onMounted } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-
-type OverallStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'OVERDUE'
-
-type BarangayIncidentRow = {
-  id: number
-  referenceCode: string
-  type: string
-  incidentDatetime: string
-  overallStatus: OverallStatus
-  currentFormType: string | null
-  deadlineAt: string | null
-}
+import {
+  useBarangayIncidentStore,
+  type BarangayIncidentRow,
+  type OverallStatus,
+} from '~/stores/useBarangayIncidentStore'
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 
-// 🔹 static sample incidents
-const rows = ref<BarangayIncidentRow[]>([
-  {
-    id: 1,
-    referenceCode: 'INC-2025-001',
-    type: 'Flooding',
-    incidentDatetime: '2025-12-10T06:00:00Z',
-    overallStatus: 'IN_PROGRESS',
-    currentFormType: 'B_FORM_2', // means Form 1 done, Form 2 currently due
-    deadlineAt: '2025-12-13T06:00:00Z',
-  },
-  {
-    id: 2,
-    referenceCode: 'INC-2025-002',
-    type: 'Fire',
-    incidentDatetime: '2025-12-05T10:00:00Z',
-    overallStatus: 'COMPLETED',
-    currentFormType: null,
-    deadlineAt: null,
-  },
-  {
-    id: 3,
-    referenceCode: 'INC-2025-003',
-    type: 'Landslide',
-    incidentDatetime: '2025-12-08T02:00:00Z',
-    overallStatus: 'OVERDUE',
-    currentFormType: 'B_FORM_1',
-    deadlineAt: '2025-12-09T02:00:00Z',
-  },
-])
+const store = useBarangayIncidentStore()
 
 function formatDate(v: string) {
   return new Date(v).toLocaleString()
@@ -54,9 +18,9 @@ function formatDate(v: string) {
 
 function humanForm(formType?: string | null) {
   if (!formType) return '-'
-  if (formType === 'B_FORM_1') return 'Form 1 – Initial Report'
-  if (formType === 'B_FORM_2') return 'Form 2 – Detailed Assessment'
-  if (formType === 'B_FORM_3') return 'Form 3 – Recovery Plan'
+  if (formType === 'B_FORM_1') return 'Form 1'
+  if (formType === 'B_FORM_2') return 'Form 2'
+  if (formType === 'B_FORM_3') return 'Form 3'
   return formType
 }
 
@@ -73,7 +37,7 @@ function overallBadge(status: OverallStatus) {
   }
 }
 
-// ✅ Nuxt UI v3+ columns
+// same columns you had, but typed with BarangayIncidentRow
 const columns: TableColumn<BarangayIncidentRow>[] = [
   {
     accessorKey: 'referenceCode',
@@ -149,18 +113,15 @@ const columns: TableColumn<BarangayIncidentRow>[] = [
   },
 ]
 
-// summary cards
-const total = computed(() => rows.value.length)
-const inProgress = computed(() => rows.value.filter(i => i.overallStatus === 'IN_PROGRESS').length)
-const overdue = computed(() => rows.value.filter(i => i.overallStatus === 'OVERDUE').length)
-const completed = computed(() => rows.value.filter(i => i.overallStatus === 'COMPLETED').length)
+onMounted(() => {
+  store.fetchIncidents()
+})
 </script>
-
 <template>
   <UPage>
     <UPageHeader
-      title="Barangay Dashboard (Static)"
-      description="Static 3-step barangay form flow: Form 1 → Form 2 → Form 3."
+      title="Barangay Dashboard"
+      description="3-step barangay form flow: Form 1 → Form 2 → Form 3."
     />
 
     <UPageBody>
@@ -169,25 +130,25 @@ const completed = computed(() => rows.value.filter(i => i.overallStatus === 'COM
           <div>
             <p class="text-sm text-gray-500">Incidents</p>
             <p class="text-2xl font-semibold">
-              {{ total }}
+              {{ store.total }}
             </p>
           </div>
           <div>
             <p class="text-sm text-gray-500">In Progress</p>
             <p class="text-2xl font-semibold text-yellow-600">
-              {{ inProgress }}
+              {{ store.inProgress }}
             </p>
           </div>
           <div>
             <p class="text-sm text-gray-500">Overdue</p>
             <p class="text-2xl font-semibold text-red-600">
-              {{ overdue }}
+              {{ store.overdue }}
             </p>
           </div>
           <div>
             <p class="text-sm text-gray-500">Completed</p>
             <p class="text-2xl font-semibold text-emerald-600">
-              {{ completed }}
+              {{ store.completed }}
             </p>
           </div>
         </div>
@@ -198,8 +159,18 @@ const completed = computed(() => rows.value.filter(i => i.overallStatus === 'COM
           <h2 class="text-lg font-semibold">Incidents</h2>
         </template>
 
-        <!-- 🔑 Nuxt UI v3: use :data -->
-        <UTable :data="rows" :columns="columns" />
+        <UTable
+          :data="store.rows"
+          :columns="columns"
+          :loading="store.loading"
+        />
+
+        <p
+          v-if="store.error"
+          class="mt-2 text-sm text-red-500"
+        >
+          {{ store.error }}
+        </p>
       </UCard>
     </UPageBody>
   </UPage>

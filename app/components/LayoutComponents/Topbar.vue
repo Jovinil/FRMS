@@ -8,8 +8,8 @@ const route = useRoute()
 
 // 🔹 Mock user for now – plug in your auth user later
 const user = ref({
-  name: 'Juan Dela Cruz',
-  role: 'MDRRMO',
+  name: useAuthStore().user?.name,
+  role: useAuthStore().user?.role,
   avatarUrl: '', // e.g. '/images/avatar.png'
 })
 

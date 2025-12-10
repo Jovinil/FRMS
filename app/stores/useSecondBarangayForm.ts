@@ -1,15 +1,13 @@
 // stores/useSecondBarangayForm.ts
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { routerKey } from 'vue-router'
 import type { SecondBarangayForm } from '~/models/secondBarangayForm'
 import { createDefaultSecondBarangayForm } from '~/models/secondBarangayForm'
 
 export const useSecondBarangayFormStore = defineStore('secondBarangayForm', () => {
   const form = ref<SecondBarangayForm>(createDefaultSecondBarangayForm())
   const { success, error } = useFlash()
-  const router = useRouter();
-
+  const router = useRouter()
 
   function setForm(newForm: SecondBarangayForm) {
     form.value = newForm
@@ -21,15 +19,20 @@ export const useSecondBarangayFormStore = defineStore('secondBarangayForm', () =
 
   async function saveToApi() {
     try {
+
+      const payload = {
+        userId: String(useAuthStore().user?.id),
+        form: form.value,
+      }
+
       const result = await $fetch('/api/forms/second-barangay/create', {
         method: 'POST',
-        body: form.value,
+        body: payload,
       })
 
-      router.go(0);
       success('Second Barangay Form submitted successfully.')
-      // refresh / redirect if you want:
-      await navigateTo('/barangay/second-barangay-form-ii')
+
+      await router.replace('/barangay')
       return result
     } catch (e) {
       console.error(e)
