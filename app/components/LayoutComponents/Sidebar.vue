@@ -42,8 +42,9 @@ const MDRRMOMenu = [
 ]
 
 const barangayMenu = [
-  { label: "RDANA", to: "/barangay/" },
-  { label: "DANA", to: "/barangay/dana" },
+  { label: "Form 1", to: "/barangay/first-barangay-form-i" },
+  { label: "Form 2", to: "/barangay/second-barangay-form-ii" },
+  { label: "Form 3", to: "/barangay/third-barangay-form-iii" },
   { label: "Evacuation Center", to: "/barangay/evacuation-center" },
   { label: "Logout", to: "/logout" }
 ]
