@@ -30,23 +30,21 @@ const adminMenu = [
   { label: "RDANA/DANA", to: "/admin/rdana" },
   { label: "Create Account", to: "admin/createAccount" },
   { label: "Generate Report", to: "/admin/generateReport" },
-  { label: "Logout", to: "/logout" }
 ]
 
 const MDRRMOMenu = [
   { label: "Dashboard", to: "/mdrrmo/" },
   { label: "Generate Report", to: "/mdrrmo/report" },
   { label: "Map", to: "/mdrrmo/map" },
-  { label: "RDANA/DANA", to: "/mdrrmo/rdana/form-1" },
-  { label: "Logout", to: "/logout" }
+  { label: "RDANA", to: "/mdrrmo/rdana/form-1" },
 ]
 
 const barangayMenu = [
+  { label: "Dashboard", to: "/barangay" },
   { label: "Form 1", to: "/barangay/first-barangay-form-i" },
   { label: "Form 2", to: "/barangay/second-barangay-form-ii" },
   { label: "Form 3", to: "/barangay/third-barangay-form-iii" },
   { label: "Evacuation Center", to: "/barangay/evacuation-center" },
-  { label: "Logout", to: "/logout" }
 ]
 // ... end of menu definitions
 
