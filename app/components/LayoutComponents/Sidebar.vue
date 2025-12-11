@@ -26,7 +26,6 @@ const sidebarUi = {
 // Menu definitions remain the same...
 const adminMenu = [
   { label: "Dashboard", to: "/admin" },
-  { label: "User Management", to: "/admin/userManagement" },
   { label: "Create Account", to: "/admin/createAccount" },
 ]
 

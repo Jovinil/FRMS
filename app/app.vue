@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const toaster = { duration: 1000 } // 10-second toasts globally
+const toaster = { duration: 10000 } // 10-second toasts globally
 const auth = useAuthStore()
 const { checkReminder } = useBarangayFormReminder()
 
