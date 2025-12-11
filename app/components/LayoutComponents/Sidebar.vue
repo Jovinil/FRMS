@@ -25,11 +25,9 @@ const sidebarUi = {
 
 // Menu definitions remain the same...
 const adminMenu = [
-  { label: "Dashboard", to: "/admin/" },
+  { label: "Dashboard", to: "/admin" },
   { label: "User Management", to: "/admin/userManagement" },
-  { label: "RDANA/DANA", to: "/admin/rdana" },
-  { label: "Create Account", to: "admin/createAccount" },
-  { label: "Generate Report", to: "/admin/generateReport" },
+  { label: "Create Account", to: "/admin/createAccount" },
 ]
 
 const MDRRMOMenu = [
