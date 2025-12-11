@@ -11,7 +11,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "extract:rdana": "ts-node app/scripts/extract"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.1.2",

@@ -385,7 +385,7 @@ onMounted(() => {
     <!-- ... rest unchanged ... -->
 
     <!-- Signature -->
-    <section class="space-y-4">
+    <!-- <section class="space-y-4">
       <h2 class="text-lg font-semibold">E. Local Initial Response – Signature</h2>
 
       <UFormField
@@ -398,6 +398,6 @@ onMounted(() => {
           placeholder="Name of BDRRMC Chairman"
         />
       </UFormField>
-    </section>
+    </section> -->
   </div>
 </template>

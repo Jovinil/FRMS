@@ -380,7 +380,7 @@ onMounted(() => {
         />
       </UFormField>
 
-      <UFormField
+      <!-- <UFormField
         label="Signed (BDRRMC Chairman)"
         name="damageAssessmentSignedByChairman"
         required
@@ -389,7 +389,7 @@ onMounted(() => {
           v-model="form.damageAssessmentSignedByChairman"
           placeholder="Name of BDRRMC Chairman"
         />
-      </UFormField>
+      </UFormField> -->
     </section>
 
     <!-- SUMMARY REPORT OF EVACUEES (page 4) -->

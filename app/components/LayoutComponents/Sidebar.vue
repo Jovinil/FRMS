@@ -34,7 +34,7 @@ const adminMenu = [
 
 const MDRRMOMenu = [
   { label: "Dashboard", to: "/mdrrmo/" },
-  { label: "Generate Report", to: "/mdrrmo/report" },
+  { label: "Generate Report", to: "/mdrrmo/generateReport" },
   { label: "Map", to: "/mdrrmo/map" },
   { label: "RDANA", to: "/mdrrmo/rdana/form-1" },
 ]

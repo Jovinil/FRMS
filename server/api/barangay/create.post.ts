@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const { name, population, location, elevation, longitude, latitude } = validated.data
-
+ 
     // ✅ Create Barangay in DB
     const barangay = await prisma.barangay.create({
       data: {

@@ -18,7 +18,6 @@ export const firstBarangayFormSchema = z.object({
   incidentProfile: firstBarangayIncidentProfileSchema,
   searchRescueNeeded: yesNoSchema.nullable(),
   evacuationNeeded: yesNoSchema.nullable(),
-  signedByChairman: z.string().min(1, 'Required'),
 });
 
 export type FirstBarangayFormSchemaType = z.infer<typeof firstBarangayFormSchema>;

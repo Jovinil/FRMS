@@ -154,8 +154,6 @@ export const secondBarangayFormSchema = z.object({
     initiallyServedAdults: z.number().int().nonnegative().nullable(),
     extentOfLocalAssistance: z.string().optional().default(''),
   }),
-
-  signedByChairman: z.string().min(1, 'Required'),
 });
 
 export type SecondBarangayFormSchemaType = z.infer<typeof secondBarangayFormSchema>;

@@ -60,8 +60,8 @@ export function useMapbox(
       container: mapContainer.value,
       style: styleUrl,              // ✅ actually use your custom style
       center: [124.22636, 13.57884],
-      zoom: 16.7,
-      minZoom: 8,
+      zoom: 11,
+      minZoom: 11,
       maxZoom: 22,                  // ✅ Mapbox max zoom on web
       bearing: 0,
       pitch: 0,                     // set back to 49 if you want tilt
