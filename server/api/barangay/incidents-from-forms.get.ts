@@ -189,8 +189,5 @@ export default defineEventHandler(async () => {
     rows.push(buildRow({ source: 'THIRD', rec }))
   }
 
-  // 👀 sanity check in server logs
-  console.log('INCIDENT ROWS (API):', rows)
-
   return rows
 })

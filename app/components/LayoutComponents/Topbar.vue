@@ -2,22 +2,40 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from '#app'
 import type { DropdownMenuItem } from '@nuxt/ui'
+import { useAuthStore } from '~/stores/useAuthStore'
 
 const router = useRouter()
 const route = useRoute()
+const auth = useAuthStore()
 
-// 🔹 Mock user for now – plug in your auth user later
-const user = ref({
-  name: useAuthStore().user?.name,
-  role: useAuthStore().user?.role,
-  avatarUrl: '', // e.g. '/images/avatar.png'
+// Reactive user details from auth store
+const user = computed(() => ({
+  name: auth.user?.name ?? 'User',
+  role: auth.user?.role ?? '',
+  avatarUrl: '', // plug your avatar URL here if you have one
+}))
+
+// Role-based profile path
+const profilePath = computed(() => {
+  const role = auth.user?.role
+
+  switch (role) {
+    case 'ADMIN':
+      return '/admin/profile'
+    case 'BARANGAY_OFFICIAL':
+      return '/barangay/profile'
+    case 'MDRRMO':
+      return '/mdrrmo/profile'
+    default:
+      return '/profile' // fallback
+  }
 })
 
-// Highlight "Profile" when on /profile
-const isOnProfile = computed(() => route.path === '/profile')
+// Highlight "Profile" when on the role-specific profile route
+const isOnProfile = computed(() => route.path === profilePath.value)
 
-// Dropdown items, using Nuxt UI's DropdownMenuItem API
-const menuItems = ref<DropdownMenuItem[][]>([
+// Dropdown items as a computed so they react to auth changes
+const menuItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
       label: user.value.name,
@@ -32,16 +50,16 @@ const menuItems = ref<DropdownMenuItem[][]>([
       label: 'Profile',
       icon: 'i-lucide-user',
       type: 'link',
-      to: '/profile'     // ← this is what does the redirect
-    }
+      to: profilePath.value, // 👈 role-aware profile route
+    },
   ],
   [
     {
       label: 'Logout',
       icon: 'i-lucide-log-out',
       color: 'error',
-      onSelect() {
-        // TODO: replace with real logout call
+      async onSelect() {
+        // TODO: replace with your real logout logic
         // await $fetch('/api/auth/logout', { method: 'POST' })
         router.push('/logout')
       },
@@ -55,8 +73,6 @@ const menuItems = ref<DropdownMenuItem[][]>([
     <img src="/images/logo.png" alt="FRMS Logo" class="h-15" />
 
     <nav class="flex items-center gap-4">
-
-      <!-- Profile dropdown -->
       <UDropdownMenu
         :items="menuItems"
         :content="{
@@ -64,9 +80,7 @@ const menuItems = ref<DropdownMenuItem[][]>([
           side: 'bottom',
           sideOffset: 8
         }"
-        :ui="{
-          content: 'w-48'
-        }"
+        :ui="{ content: 'w-48' }"
       >
         <UButton
           color="neutral"
