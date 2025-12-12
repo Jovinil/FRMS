@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useSecondBarangayFormStore } from '~/stores/useSecondBarangayForm'
+import { useAuthStore } from '~/stores/useAuthStore'
 
 const store = useSecondBarangayFormStore()
 const form = store.form
@@ -11,24 +12,77 @@ const yesNoItems = [
   { label: 'No', value: 'no' },
 ]
 
-// helper to format current datetime as "YYYY-MM-DD HH:mm"
-function formatNowForInput() {
-  const now = new Date()
+const auth = useAuthStore()
+const barangayId = auth.user?.barangayId
+
+function formatDate(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
-
-  const year = now.getFullYear()
-  const month = pad(now.getMonth() + 1)
-  const day = pad(now.getDate())
-  const hour = pad(now.getHours())
-  const minute = pad(now.getMinutes())
-
-  return `${year}-${month}-${day} ${hour}:${minute}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`
 }
 
-onMounted(() => {
-  // only set default if user hasn't typed anything yet
-  if (!form.profileOfDisaster.dateTimeOfOccurrence) {
-    form.profileOfDisaster.dateTimeOfOccurrence = formatNowForInput()
+// Converts many inputs into "YYYY-MM-DD HH:mm"
+function formatToInput(value: unknown) {
+  if (!value) return ''
+
+  // If already "YYYY-MM-DD HH:mm", keep it.
+  if (typeof value === 'string') {
+    const s = value.trim()
+
+    // already correct format
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(s)) return s
+
+    // "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DD HH:mm"
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return s.replace('T', ' ')
+
+    // "YYYY-MM-DD HH:mm:ss" -> "YYYY-MM-DD HH:mm"
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0, 16)
+
+    // try parse other date strings
+    const d = new Date(s)
+    if (!Number.isNaN(d.getTime())) return formatDate(d)
+
+    return '' // not parseable
+  }
+
+  if (typeof value === 'number') {
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? '' : formatDate(d)
+  }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? '' : formatDate(value)
+  }
+
+  return ''
+}
+
+onMounted(async () => {
+  if (!barangayId) return
+
+  const needsOccurrence = !form.profileOfDisaster.dateTimeOfOccurrence
+  const needsReports = !form.profileOfDisaster.dateTimeOfReports
+  if (!needsOccurrence && !needsReports) return
+
+  // Fetch latest First form submission
+  const first = await $fetch<{
+    createdAt: string
+    data: any
+  }>('/api/forms/first-barangay/latest', {
+    query: { barangayId },
+  })
+
+  // ✅ Occurrence = first form incidentProfile.when
+  if (needsOccurrence) {
+    const occ = formatToInput(first?.data?.incidentProfile?.when)
+    if (occ) form.profileOfDisaster.dateTimeOfOccurrence = occ
+  }
+
+  // ✅ Reports = first form createdAt
+  if (needsReports) {
+    const rep = formatToInput(first?.createdAt)
+    if (rep) form.profileOfDisaster.dateTimeOfReports = rep
   }
 })
 </script>
@@ -68,6 +122,7 @@ onMounted(() => {
           <UInput
             v-model="form.profileOfDisaster.dateTimeOfReports"
             placeholder="YYYY-MM-DD HH:mm"
+            :readonly="true"
           />
         </UFormField>
       </div>

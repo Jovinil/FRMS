@@ -1,6 +1,5 @@
 <!-- components/rdana/FirstBarangayFormFields.vue -->
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import authGlobal from '~/middleware/auth.global'
 import { useFirstBarangayFormStore } from '~/stores/useFirstBarangayStore'
 
@@ -12,26 +11,6 @@ const yesNoItems = [
   { label: 'No', value: 'no' },
 ]
 
-// helper to format current datetime as "YYYY-MM-DD HH:mm"
-function formatNowForInput() {
-  const now = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-
-  const year = now.getFullYear()
-  const month = pad(now.getMonth() + 1)
-  const day = pad(now.getDate())
-  const hour = pad(now.getHours())
-  const minute = pad(now.getMinutes())
-
-  return `${year}-${month}-${day} ${hour}:${minute}`
-}
-
-onMounted(() => {
-  // only set default if user hasn't typed anything yet
-  if (!form.incidentProfile.when) {
-    form.incidentProfile.when = formatNowForInput()
-  }
-})
 </script>
 
 <template>
@@ -96,8 +75,7 @@ onMounted(() => {
         >
           <UInput
             v-model="form.incidentProfile.when"
-            placeholder="Date and time of incident"
-            :readonly="true"
+            placeholder="YYYY-MM-DD HH:mm"
           />
         </UFormField>
 

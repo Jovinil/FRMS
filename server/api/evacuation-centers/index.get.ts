@@ -1,30 +1,16 @@
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const q = typeof query.q === 'string' ? query.q.trim() : ''
-  const take = Math.min(
-    500,
-    Math.max(1, Number(query.take ?? 200) || 200)
-  )
-  const skip = Math.max(0, Number(query.skip ?? 0) || 0)
+import { defineEventHandler } from 'h3'
 
-  const where = q
-    ? { name: { contains: q, mode: 'insensitive' as const } }
-    : {}
-
+export default defineEventHandler(async () => {
   const centers = await prisma.evacuationCenter.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take,
-    skip,
+    orderBy: { name: 'asc' },
     select: {
       id: true,
       name: true,
       capacity: true,
       latitude: true,
       longitude: true,
-      createdAt: true,
     },
   })
 
-  return { ok: true, evacuationCenters: centers }
+  return centers
 })

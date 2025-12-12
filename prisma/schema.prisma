@@ -11,30 +11,45 @@ model FirstBarangayFormSubmission {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+  userId Int
+  barangayId Int
   submittedAt DateTime?
 
   data        Json     // entire FirstBarangayForm from Pinia
+  
+  user       User     @relation(fields: [userId], references: [id])
+  
+  barangay       Barangay     @relation(fields: [barangayId], references: [id])
 }
 
 model SecondBarangayFormSubmission {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+userId Int
+barangayId Int
   submittedAt DateTime?
 
   data        Json     // entire SecondBarangayForm from Pinia
+  
+  user       User     @relation(fields: [userId], references: [id])
+  
+  barangay       Barangay     @relation(fields: [barangayId], references: [id])
 }
 
 model ThirdBarangayFormSubmission {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+userId Int
+barangayId Int
   submittedAt DateTime?
 
   data        Json     // entire ThirdBarangayForm from Pinia
+  
+  user       User     @relation(fields: [userId], references: [id])
+  
+  barangay       Barangay     @relation(fields: [barangayId], references: [id])
 }
 
 model BarangayFormProgress {
@@ -55,6 +70,8 @@ model BarangayFormProgress {
 model FirstRdanaSubmission {
   id                          String    @id @default(cuid())
   createdAt                   DateTime  @default(now())
+  userId Int
+  barangayId Int
   updatedAt                   DateTime  @updatedAt
   submittedAt                 DateTime?
   submittedByAuthId           String?
@@ -69,6 +86,10 @@ model FirstRdanaSubmission {
   protectionEducation         Json?
   reliefSrr                   Json?
   submittedBy                 Json?
+  
+  user       User     @relation(fields: [userId], references: [id])
+  
+  barangay       Barangay     @relation(fields: [barangayId], references: [id])
 }
 
 model User {
@@ -80,6 +101,10 @@ model User {
   email                                   String                                    @unique
   role                                    Role
   barangayId                              Int?
+  firstBarangayFormSubmission FirstBarangayFormSubmission[]
+  secondBarangayFormSubmission  SecondBarangayFormSubmission[]
+  thirdBarangayFormSubmission ThirdBarangayFormSubmission[]
+  firstRdanaSubmission FirstRdanaSubmission[]
   damageAssessmentNeedAnalysisReport      DamageAssessmentNeedAnalysisReport[]
   floodRiskMap                            FLoodRiskMap[]
   generatedReports                        GeneratedReport[]
@@ -90,12 +115,19 @@ model User {
 model Barangay {
   id                                      Int                                       @id @default(autoincrement())
   name                                    String
+  province String
+  city String
+  purok String
   population                              Int
   location                                String
   longitude                               Decimal
   latitude                                Decimal
   createdAt                               DateTime                                  @default(now())
   elevation                               Decimal
+    firstBarangayFormSubmission FirstBarangayFormSubmission[]
+  secondBarangayFormSubmission  SecondBarangayFormSubmission[]
+  thirdBarangayFormSubmission ThirdBarangayFormSubmission[]
+  firstRdanaSubmission FirstRdanaSubmission[]
   damageAssessmentNeedAnalysisReport      DamageAssessmentNeedAnalysisReport[]
   floodRiskMap                            FLoodRiskMap[]
   rapidDamageAssessmentNeedAnalysisReport RapidDamageAssessmentNeedAnalysisReport[]

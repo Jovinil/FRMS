@@ -1,7 +1,7 @@
-<!-- components/rdana/ThirdBarangayFormFields.vue -->
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useThirdBarangayFormStore } from '~/stores/useThirdBarangayForm'
+import { useAuthStore } from '~/stores/useAuthStore'
 
 const store = useThirdBarangayFormStore()
 const form = store.form
@@ -11,30 +11,170 @@ const yesNoItems = [
   { label: 'No', value: 'no' },
 ]
 
-// helper to format current datetime as "YYYY-MM-DD HH:mm"
-function formatNowForInput() {
-  const now = new Date()
+const auth = useAuthStore()
+const userId = auth.user?.id
+const barangayId = auth.user?.barangayId
+
+// dropdown items for evacuation centers
+const evacuationCenterItems = ref<{ label: string; value: string }[]>([])
+
+function nowInput() {
+  const d = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
-
-  const year = now.getFullYear()
-  const month = pad(now.getMonth() + 1)
-  const day = pad(now.getDate())
-  const hour = pad(now.getHours())
-  const minute = pad(now.getMinutes())
-
-  return `${year}-${month}-${day} ${hour}:${minute}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`
 }
 
-onMounted(() => {
-  // Only set defaults if user hasn't typed anything yet
-  if (!form.profileOfDisaster.dateTimeOfOccurrence) {
-    form.profileOfDisaster.dateTimeOfOccurrence = formatNowForInput()
+function todayDateInput() {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+function formatDate(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`
+}
+
+// Converts many inputs into "YYYY-MM-DD HH:mm"
+function formatToInput(value: unknown) {
+  if (!value) return ''
+
+  if (typeof value === 'string') {
+    const s = value.trim()
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(s)) return s
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return s.replace('T', ' ')
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0, 16)
+
+    const d = new Date(s)
+    return Number.isNaN(d.getTime()) ? '' : formatDate(d)
   }
-  if (!form.profileOfDisaster.dateTimeOfReport) {
-    form.profileOfDisaster.dateTimeOfReport = formatNowForInput()
+
+  if (typeof value === 'number') {
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? '' : formatDate(d)
   }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? '' : formatDate(value)
+  }
+
+  return ''
+}
+
+function isEmpty(v: unknown) {
+  return v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
+}
+function setIfEmpty(getter: () => any, setter: (v: any) => void, value: any) {
+  if (isEmpty(getter()) && !isEmpty(value)) setter(value)
+}
+
+async function resolveUserBarangayName(): Promise<string | null> {
+  // best-effort from auth store first
+  const maybe =
+    (auth.user as any)?.barangay?.name ??
+    (auth.user as any)?.barangayName ??
+    (auth.user as any)?.barangay?.label
+  if (typeof maybe === 'string' && maybe.trim()) return maybe.trim()
+
+  // fallback: fetch from prisma
+  if (!userId) return null
+  try {
+    const res = await $fetch<{ barangayName: string }>(`/api/user/${userId}/barangay`)
+    return res?.barangayName?.trim?.() ?? null
+  } catch {
+    return null
+  }
+}
+
+onMounted(async () => {
+  // 0) fetch evacuation centers for dropdown
+  const centers = await $fetch<Array<{ id: number; name: string }>>('/api/evacuation-centers')
+  evacuationCenterItems.value = centers.map((c) => ({ label: c.name, value: c.name }))
+
+  // If no logged-in user, fallback defaults only
+  if (!userId) {
+    if (!form.profileOfDisaster.dateTimeOfOccurrence) form.profileOfDisaster.dateTimeOfOccurrence = nowInput()
+    if (!form.profileOfDisaster.dateTimeOfReport) form.profileOfDisaster.dateTimeOfReport = nowInput()
+
+    setIfEmpty(() => form.evacueeSummary.date, (v) => (form.evacueeSummary.date = v), todayDateInput())
+    setIfEmpty(
+      () => form.evacueeSummary.typeOfDisaster,
+      (v) => (form.evacueeSummary.typeOfDisaster = v),
+      form.profileOfDisaster.typeOfDisaster
+    )
+    return
+  }
+
+  // 1) Fetch latest second form submission
+  const second = await $fetch<{ createdAt: string; data: any }>('/api/forms/second-barangay/latest', {
+    query: { barangayId },
+  })
+  const s = second?.data ?? {}
+
+  // 2) Map Second -> Third (KEEPING YOUR OTHER DATA)
+  setIfEmpty(
+    () => form.profileOfDisaster.typeOfDisaster,
+    (v) => (form.profileOfDisaster.typeOfDisaster = v),
+    s?.profileOfDisaster?.typeOfDisaster
+  )
+
+  setIfEmpty(
+    () => form.profileOfDisaster.dateTimeOfOccurrence,
+    (v) => (form.profileOfDisaster.dateTimeOfOccurrence = v),
+    formatToInput(s?.profileOfDisaster?.dateTimeOfOccurrence)
+  )
+
+  setIfEmpty(
+    () => form.profileOfDisaster.dateTimeOfReport,
+    (v) => (form.profileOfDisaster.dateTimeOfReport = v),
+    formatToInput(s?.profileOfDisaster?.dateTimeOfReports ?? second?.createdAt)
+  )
+
+  setIfEmpty(
+    () => form.profileOfDisaster.sourceOfReport,
+    (v) => (form.profileOfDisaster.sourceOfReport = v),
+    s?.profileOfDisaster?.sourceOfReports
+  )
+
+  setIfEmpty(
+    () => form.summaryOfEffects.areasAffected,
+    (v) => (form.summaryOfEffects.areasAffected = v),
+    s?.profileOfDisaster?.areasAffected
+  )
+
+  // 3) Summary report of evacuees defaults + new rules
+  const barangayName = await resolveUserBarangayName()
+  setIfEmpty(() => form.evacueeSummary.barangay, (v) => (form.evacueeSummary.barangay = v), barangayName)
+
+  setIfEmpty(() => form.evacueeSummary.date, (v) => (form.evacueeSummary.date = v), todayDateInput())
+
+  setIfEmpty(
+    () => form.evacueeSummary.typeOfDisaster,
+    (v) => (form.evacueeSummary.typeOfDisaster = v),
+    form.profileOfDisaster.typeOfDisaster
+  )
+
+  // 4) final fallback if still empty
+  if (!form.profileOfDisaster.dateTimeOfOccurrence) form.profileOfDisaster.dateTimeOfOccurrence = nowInput()
+  if (!form.profileOfDisaster.dateTimeOfReport) form.profileOfDisaster.dateTimeOfReport = formatToInput(second?.createdAt) || nowInput()
 })
+
+// Keep evacueeSummary.typeOfDisaster synced if still empty
+watch(
+  () => form.profileOfDisaster.typeOfDisaster,
+  (v) => {
+    if (isEmpty(form.evacueeSummary.typeOfDisaster) && !isEmpty(v)) {
+      form.evacueeSummary.typeOfDisaster = v
+    }
+  }
+)
 </script>
+
+
 
 <template>
   <div class="space-y-8 mt-6">
@@ -413,7 +553,9 @@ onMounted(() => {
           name="evacueeSummary.barangay"
           required
         >
-          <UInput v-model="form.evacueeSummary.barangay" />
+          <UInput v-model="form.evacueeSummary.barangay" 
+          :readonly="true"
+            />
         </UFormField>
 
         <UFormField
@@ -448,13 +590,22 @@ onMounted(() => {
           <p class="text-xs font-semibold">
             #{{ index + 1 }}
           </p>
+          <UInputMenu
+            class="w-50"
+            v-model="center.nameOfEvacuationCenter"
+            :items="evacuationCenterItems"
+            value-key="value"
+            option-attribute="label"
+            placeholder="Select evacuation center"
+          />
 
-          <UFormField
+
+          <!-- <UFormField
             :label="`Name of evacuation center`"
             :name="`evacueeSummary.centers.${index}.nameOfEvacuationCenter`"
           >
             <UInput v-model="center.nameOfEvacuationCenter" />
-          </UFormField>
+          </UFormField> -->
 
           <div class="grid gap-2 md:grid-cols-2 md:col-span-2">
             <UFormField

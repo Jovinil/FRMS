@@ -8,7 +8,7 @@ import {
 } from '~/stores/useBarangayIncidentStore'
 
 const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
+// ❌ removed: const UButton = resolveComponent('UButton')
 
 const store = useBarangayIncidentStore()
 
@@ -37,7 +37,7 @@ function overallBadge(status: OverallStatus) {
   }
 }
 
-// same columns you had, but typed with BarangayIncidentRow
+// ✅ columns without actions
 const columns: TableColumn<BarangayIncidentRow>[] = [
   {
     accessorKey: 'referenceCode',
@@ -86,37 +86,13 @@ const columns: TableColumn<BarangayIncidentRow>[] = [
       )
     },
   },
-  {
-    id: 'actions',
-    header: '',
-    meta: {
-      class: {
-        th: 'text-right',
-        td: 'text-right',
-      },
-    },
-    cell: ({ row }) => {
-      const formType = row.original.currentFormType
-      const label = formType ? `Fill ${humanForm(formType)}` : 'No pending form'
-
-      return h(
-        UButton as any,
-        {
-          size: 'xs',
-          color: formType ? 'primary' : 'neutral',
-          variant: formType ? 'solid' : 'outline',
-          disabled: !formType,
-        },
-        () => label,
-      )
-    },
-  },
 ]
 
 onMounted(() => {
   store.fetchIncidents()
 })
 </script>
+
 <template>
   <UPage>
     <UPageHeader
