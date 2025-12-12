@@ -138,7 +138,7 @@ export const thirdBarangayFormSchema = z.object({
     extentOfLocalAssistance: z.string().optional().default(''),
   }),
 
-  damageAssessmentSignedByChairman: z.string().min(1, 'Required'),
+  // damageAssessmentSignedByChairman: z.string().min(1, 'Required'),
 
   evacueeSummary: z.object({
     date: z.string().min(1, 'Required'),

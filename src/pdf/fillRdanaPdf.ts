@@ -861,6 +861,8 @@ export async function fillRdanaPdf(
   setText(form, F.submittedBy.contactNumber, sub.contactNumber);
   setText(form, F.submittedBy.email, sub.email);
 
+  form.flatten();
+
   // DONE – return bytes
   const pdfBytes = await pdfDoc.save();
   return pdfBytes;

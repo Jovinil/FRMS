@@ -332,7 +332,7 @@ async function onSubmit() {
     isGenerating.value = true
 
     // Load your base fillable template
-    const response = await fetch('/pdf/fillable-rdana-form.pdf')
+    const response = await fetch('/server/templates/fillable-rdana-form.pdf')
     const pdfArrayBuffer = await response.arrayBuffer()
 
     // Fill PDF with form data

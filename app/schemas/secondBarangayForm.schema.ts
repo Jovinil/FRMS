@@ -48,18 +48,18 @@ export const secondBarangayFormSchema = z.object({
     unmetNeeds: z.string().optional().default(''),
   }),
 
-  evacuation: z.object({
-    exactLocations: z.string().min(1, 'Required'),
-    approxToEvacuateInfants: z.number().int().nonnegative().nullable(),
-    approxToEvacuateChildren: z.number().int().nonnegative().nullable(),
-    approxToEvacuateAdultsWomen: z.number().int().nonnegative().nullable(),
-    responseDescription: z.string().optional().default(''),
-    unmetNeeds: z.string().optional().default(''),
-    evacuationCentersNames: z.string().optional().default(''),
-    numberInECsNeedAssistance: z.string().optional().default(''),
-    dailyRequirementsInECs: z.string().optional().default(''),
-    enoughLatrinesInECs: yesNoSchema.nullable(),
-  }),
+  // evacuation: z.object({
+  //   exactLocations: z.string().min(1, 'Required'),
+  //   approxToEvacuateInfants: z.number().int().nonnegative().nullable(),
+  //   approxToEvacuateChildren: z.number().int().nonnegative().nullable(),
+  //   approxToEvacuateAdultsWomen: z.number().int().nonnegative().nullable(),
+  //   responseDescription: z.string().optional().default(''),
+  //   unmetNeeds: z.string().optional().default(''),
+  //   evacuationCentersNames: z.string().optional().default(''),
+  //   numberInECsNeedAssistance: z.string().optional().default(''),
+  //   dailyRequirementsInECs: z.string().optional().default(''),
+  //   enoughLatrinesInECs: yesNoSchema.nullable(),
+  // }),
 
   medicalHealth: z.object({
     numberInjured: z.number().int().nonnegative().nullable(),
