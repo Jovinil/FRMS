@@ -8,7 +8,7 @@ const path = require('path');
 async function main() {
   const pdfPath = path.resolve(
     __dirname,
-    '../pdf-templates/RDANA-Form-MDRRMO-fillable.pdf',
+    '../pdf-templates/rdana-mdrrmo-fillable-complete.pdf',
   );
 
   if (!fs.existsSync(pdfPath)) {
@@ -53,33 +53,27 @@ async function main() {
         break;
     }
 
+    // Keep order exactly as returned
     groups[kind].push(name);
   }
 
-  const sortAsc = (a, b) => a.localeCompare(b);
-
-  groups.text.sort(sortAsc);
-  groups.checkbox.sort(sortAsc);
-  groups.radio.sort(sortAsc);
-  groups.other.sort(sortAsc);
-
-  console.log('=== TEXT FIELDS (T[index]) ===');
+  console.log('=== TEXT FIELDS (T[index], original order) ===');
   groups.text.forEach((name, idx) => {
     console.log(`T[${idx}]  ${name}`);
   });
 
-  console.log('\n=== CHECKBOX FIELDS (C[index]) ===');
+  console.log('\n=== CHECKBOX FIELDS (C[index], original order) ===');
   groups.checkbox.forEach((name, idx) => {
     console.log(`C[${idx}]  ${name}`);
   });
 
-  console.log('\n=== RADIO FIELDS (R[index]) ===');
+  console.log('\n=== RADIO FIELDS (R[index], original order) ===');
   groups.radio.forEach((name, idx) => {
     console.log(`R[${idx}]  ${name}`);
   });
 
   if (groups.other.length) {
-    console.log('\n=== OTHER FIELDS ===');
+    console.log('\n=== OTHER FIELDS (original order) ===');
     groups.other.forEach((name, idx) => {
       console.log(`OTHER[${idx}]  ${name}`);
     });
