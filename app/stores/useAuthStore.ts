@@ -56,7 +56,7 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async login(email?: string) {
-            if(!email) console.log("recea")
+            const router = useRouter()
             const validated = emailSchema.safeParse({email})
 
             if(!validated.success){
@@ -72,13 +72,16 @@ export const useAuthStore = defineStore('auth', {
                 this.user = SuperJSON.deserialize(data)
                 switch (this.user!.role) {
                     case 'ADMIN':
-                        navigateTo('/admin')
+                        await navigateTo('/admin')
+                        router.go(0)
                         break;
                     case 'BARANGAY_OFFICIAL':
-                        navigateTo('/barangay')
+                        await navigateTo('/barangay')
+                        router.go(0)
                         break;
                     case 'MDRRMO':
-                        navigateTo('/mdrrmo')
+                        await navigateTo('/mdrrmo')
+                        router.go(0)
                         break;
                     default:
                         navigateTo('/login')

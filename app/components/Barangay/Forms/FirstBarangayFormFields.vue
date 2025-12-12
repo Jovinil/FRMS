@@ -1,6 +1,5 @@
-<!-- components/rdana/FirstBarangayFormFields.vue -->
 <script setup lang="ts">
-import authGlobal from '~/middleware/auth.global'
+import { onMounted } from 'vue'
 import { useFirstBarangayFormStore } from '~/stores/useFirstBarangayStore'
 
 const store = useFirstBarangayFormStore()
@@ -11,7 +10,28 @@ const yesNoItems = [
   { label: 'No', value: 'no' },
 ]
 
+function pad(n: number) {
+  return String(n).padStart(2, '0')
+}
+
+function nowYYYYMMDDHHmm() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = pad(d.getMonth() + 1)
+  const dd = pad(d.getDate())
+  const hh = pad(d.getHours())
+  const min = pad(d.getMinutes())
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`
+}
+
+onMounted(() => {
+  // set only if empty so user can still edit it
+  if (!form.incidentProfile.when) {
+    form.incidentProfile.when = nowYYYYMMDDHHmm()
+  }
+})
 </script>
+
 
 <template>
   <div class="space-y-6 mt-6">
@@ -76,6 +96,7 @@ const yesNoItems = [
           <UInput
             v-model="form.incidentProfile.when"
             placeholder="YYYY-MM-DD HH:mm"
+            :readonly="true"
           />
         </UFormField>
 

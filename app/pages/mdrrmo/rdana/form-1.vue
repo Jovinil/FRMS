@@ -1,67 +1,172 @@
 <script setup lang="ts">
-  import { computed } from 'vue';
-  import { useRdanaForm } from '~/composables/useFirstRdanaForm';
-  import type { RdanaForm } from '~/models/firstRdanaForm';
+import { computed, ref, onMounted } from 'vue'
+import { useRdanaForm } from '~/composables/useFirstRdanaForm'
+import type { RdanaForm } from '~/models/firstRdanaForm'
+import { useAuthStore } from '~/stores/useAuthStore'
 
-const { form, schema, steps, currentStep, nextStep, prevStep, submit, reset } = useRdanaForm();
+const { form, schema, steps, currentStep, nextStep, prevStep, submit, reset } = useRdanaForm()
 
-const totalSteps = computed(() => steps.length);
+const totalSteps = computed(() => steps.length)
 
 const progress = computed(() => {
-  if (!totalSteps.value) return 0; // safety if steps is empty
-  return Math.round(((currentStep.value + 1) / totalSteps.value) * 100);
-});
+  if (!totalSteps.value) return 0
+  return Math.round(((currentStep.value + 1) / totalSteps.value) * 100)
+})
 
 const currentStepLabel = computed(() => {
-  const step = steps[currentStep.value];
-  return step?.label || `Step ${currentStep.value + 1}`;
-});
+  const step = steps[currentStep.value]
+  return step?.label || `Step ${currentStep.value + 1}`
+})
 
 async function onSubmit() {
-  // await downloadRdanaPdf(form.value);
-  await submit();
+  // await downloadRdanaPdf(form.value)
+  await submit()
 }
 
-const isDownloading = ref(false);
-const formData = ref<RdanaForm | null>(null); // whatever your actual state is
+const isDownloading = ref(false)
+const formData = ref<RdanaForm | null>(null)
 
 async function downloadRdanaPdf(formData: RdanaForm) {
   const res = await fetch('/api/rdana-pdf', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(formData),
-  });
+  })
 
-  if (!res.ok) {
-    throw new Error('Failed to generate RDANA PDF');
-  }
+  if (!res.ok) throw new Error('Failed to generate RDANA PDF')
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
+  const blob = await res.blob()
+  const url = window.URL.createObjectURL(blob)
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'RDANA.pdf';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'RDANA.pdf'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
 
-  window.URL.revokeObjectURL(url);
+  window.URL.revokeObjectURL(url)
 }
 
 async function handleDownload() {
-  if (!formData.value) return;
-
+  if (!formData.value) return
   try {
-    isDownloading.value = true;
-    await downloadRdanaPdf(formData.value);
+    isDownloading.value = true
+    await downloadRdanaPdf(formData.value)
   } finally {
-    isDownloading.value = false;
+    isDownloading.value = false
   }
 }
+
+/* ---------------------------
+   ✅ PREFILL FROM FORM 3
+   (only fields Form 3 has data about)
+---------------------------- */
+
+const auth = useAuthStore()
+
+function isEmpty(v: unknown) {
+  return v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
+}
+
+function setIfEmpty(getter: () => any, setter: (v: any) => void, value: any) {
+  if (isEmpty(getter()) && !isEmpty(value)) setter(value)
+}
+
+function clamp0(n: unknown) {
+  if (n === null || n === undefined) return null
+  const v = typeof n === 'number' ? n : Number(n)
+  if (Number.isNaN(v)) return null
+  return Math.max(0, v)
+}
+
+async function resolveBarangayId(): Promise<number | null> {
+  const direct =
+    (auth.user as any)?.barangayId ??
+    (auth.user as any)?.barangay?.id ??
+    null
+
+  if (Number.isFinite(direct)) return Number(direct)
+
+  // optional fallback if you have an endpoint for this
+  const userId = (auth.user as any)?.id
+  if (!userId) return null
+
+  try {
+    const res = await $fetch<{ barangayId: number }>(`/api/users/${userId}/barangay`)
+    return Number.isFinite(res?.barangayId) ? res.barangayId : null
+  } catch {
+    return null
+  }
+}
+
+onMounted(async () => {
+  const idForLatest = useAuthStore().user?.barangayId
+  if (!idForLatest) return
+
+  // expects: { createdAt, data } from prisma ThirdBarangayFormSubmission latest by barangayId
+  let third: { createdAt: string; data: any } | null = null
+
+  try {
+    type ThirdLatest = { id: string; createdAt: string; data: any }
+
+    const url: string = '/api/forms/third-barangay/latest'
+
+    third = await $fetch<ThirdLatest>(url, {  
+  query: { barangayId: String(idForLatest) },
+})
+
+  } catch (e) {
+    console.warn('Failed to prefill from Form 3:', e)
+    return
+  }
+
+  const t = third?.data ?? {}
+  const f = form.value
+
+  // ----------------
+  // RDANA Page 1: Profile / Mission
+  // ----------------
+  setIfEmpty(
+    () => f.profile.emergencyOperation.typeOfDisaster,
+    (v) => (f.profile.emergencyOperation.typeOfDisaster = v),
+    t?.profileOfDisaster?.typeOfDisaster
+  )
+
+  setIfEmpty(
+    () => f.profile.emergencyOperation.dateTimeOfEvent,
+    (v) => (f.profile.emergencyOperation.dateTimeOfEvent = v),
+    t?.profileOfDisaster?.dateTimeOfOccurrence
+  )
+
+  // safest barangay source in Form 3
+  setIfEmpty(
+    () => f.profile.mission.barangay,
+    (v) => (f.profile.mission.barangay = v),
+    t?.evacueeSummary?.barangay
+  )
+
+  // best "RDANA time" you have is Form 3 report datetime
+  setIfEmpty(
+    () => f.profile.mission.dateTimeOfRdana,
+    (v) => (f.profile.mission.dateTimeOfRdana = v),
+    t?.profileOfDisaster?.dateTimeOfReport
+  )
+
+  // optional: auto summary from known fields
+  if (isEmpty(f.profile.summaryDescription)) {
+    const areas = t?.summaryOfEffects?.areasAffected
+    const source = t?.profileOfDisaster?.sourceOfReport
+    const parts = [
+      areas ? `Areas affected: ${areas}` : '',
+      source ? `Source of report: ${source}` : '',
+    ].filter(Boolean)
+
+    if (parts.length) f.profile.summaryDescription = parts.join('\n')
+  }
+})
 </script>
+
 
 <template>
   <div class="">
