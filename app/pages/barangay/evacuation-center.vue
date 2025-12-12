@@ -803,9 +803,19 @@ const handleSubmit = async () => {
   try {
     loading.value = true
 
+    const res = await $fetch('/api/evacuation-centers', {
+      method: 'POST',
+      body: {
+        name: form.value.name,
+        capacity: form.value.capacity,
+        latitude: form.value.latitude,
+        longitude: form.value.longitude
+      }
+    })
+
     // 🔹 For now: just log. Later: POST to your API endpoint.
     console.log('Evacuation center payload:', form.value)
-    alert('Evacuation center saved (static demo). Wire this to your backend next.')
+    alert('Evacuation center saved.')
   } catch (e) {
     console.error(e)
     alert('Failed to save evacuation center.')

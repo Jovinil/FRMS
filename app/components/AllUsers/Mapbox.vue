@@ -12,12 +12,12 @@ const {
 } = useMapbox(mapContainer, geocoderContainer)
 
 // Example evac center data; replace with your API/Prisma data
-onMounted(() => {
-  setEvacCenters([
-    { id: 1, name: 'EC 1', latitude: 13.5789, longitude: 124.2265, capacity: 150 },
-    { id: 2, name: 'EC 2', latitude: 13.5792, longitude: 124.2280, capacity: 200 },
-  ])
+onMounted(async () => {
+  const res = await $fetch('/api/evacuation-centers')
+  console.log(res.evacuationCenters)
+  setEvacCenters(res.evacuationCenters)
 })
+
 </script>
 
 <template>

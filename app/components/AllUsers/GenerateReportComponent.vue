@@ -11,10 +11,12 @@
               Generate Incident Report
             </h2>
             <p class="text-sm text-gray-600">
-              Export the latest RDANA inputs into a polished PDF for sharing with your response team.
+              Export the selected RDANA inputs into a polished PDF for sharing with your response team.
             </p>
           </div>
-          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+          <span
+            class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700"
+          >
             PDF
           </span>
         </div>
@@ -38,9 +40,60 @@
       <template #footer>
         <div class="flex items-center justify-between gap-3 text-sm text-gray-500">
           <span>Ensure details are final before exporting.</span>
-          <UButton color="info" label="Generate PDF" />
+          <UButton
+            color="info"
+            :loading="downloading"
+            :disabled="!submissionId"
+            @click="downloadIncidentPdf"
+          >
+            Generate PDF
+          </UButton>
         </div>
       </template>
     </UCard>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const props = defineProps<{
+  submissionId: string | undefined
+}>()
+
+const downloading = ref(false)
+
+const downloadIncidentPdf = async () => {
+  if (!props.submissionId) return
+
+  try {
+    downloading.value = true
+
+    const res = await fetch(`/api/rdana-report/${props.submissionId}`, {
+      method: 'GET',
+    })
+
+    if (!res.ok) {
+      console.error('Failed to fetch PDF:', res.status, res.statusText)
+      // console.log(await res.text()) // debug if needed
+      return
+    }
+
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `rdana-incident-report-${props.submissionId}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Error downloading PDF:', error)
+  } finally {
+    downloading.value = false
+  }
+}
+</script>

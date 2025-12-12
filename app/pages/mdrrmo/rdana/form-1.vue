@@ -18,7 +18,7 @@ const currentStepLabel = computed(() => {
 });
 
 async function onSubmit() {
-  // await downloadRdanaPdf(form.value);
+  await downloadRdanaPdf(form.value);
   await submit();
 }
 

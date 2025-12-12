@@ -97,7 +97,6 @@ model Barangay {
   createdAt                               DateTime                                  @default(now())
   elevation                               Decimal
   damageAssessmentNeedAnalysisReport      DamageAssessmentNeedAnalysisReport[]
-  evacuationCenters                       EvacuationCenter[]
   floodRiskMap                            FLoodRiskMap[]
   rapidDamageAssessmentNeedAnalysisReport RapidDamageAssessmentNeedAnalysisReport[]
   users                                   User[]
@@ -106,25 +105,11 @@ model Barangay {
 model EvacuationCenter {
   id               Int            @id @default(autoincrement())
   name             String
-  address          String
   capacity         Int
-  barangayId       Int
+  latitude      Float
+  longitude Float
   createdAt        DateTime       @default(now())
-  evacueesReportId Int
-  barangay         Barangay       @relation(fields: [barangayId], references: [id])
-  evacueesReport   EvacueesReport @relation(fields: [evacueesReportId], references: [id])
 }
-// model EvacuationCenter {
-//   id        String   @id @default(cuid())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   centerName String
-//   capacity   Int
-//   lng        Float
-//   lat        Float
-// }
-
 
 model GeneratedReport {
   id         Int      @id @default(autoincrement())
@@ -339,7 +324,6 @@ model EvacueesReport {
   preparedBy       String
   notedBy          String
   reportId         Int                    @unique
-  evacCenters      EvacuationCenter[]
   report           DamageAssessmentReport @relation(fields: [reportId], references: [id])
 }
 
@@ -360,7 +344,6 @@ model RapidDamageAssessmentReport {
   communityEngagement    CommunityEngagement?
   demographics           Demographics?
   eduation               Education?
-  evacuationCenterDetail EvacuationCenterDetail[]
   health                 Health?
   livelihood             Livelihood?
   localAuthority         LocalAuthority?
@@ -444,8 +427,6 @@ model EvacuationCenterDetail {
   gpsCoords     String?
   families      Int
   persons       Int
-  rapidReportId Int
-  rapidReport   RapidDamageAssessmentReport @relation(fields: [rapidReportId], references: [id])
 }
 
 model Sanitation {
