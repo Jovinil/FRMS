@@ -7,13 +7,10 @@ import type { RdanaForm } from '../../app/models/firstRdanaForm'
 // Paths relative to your project root
 const TEMPLATE_PATH = path.join(
   process.cwd(),
-  'server/pdf/templates/incident_report_template.pdf',
+  'pdf-templates/rdana-mdrrmo-fillable-complete.pdf',
 )
 
-const OUTPUT_DIR = path.join(
-  process.cwd(),
-  'server/pdf/generated',
-)
+const OUTPUT_DIR = path.join(process.cwd(), 'server/pdf/generated')
 
 /**
  * Generates a flattened RDANA PDF and saves it locally.

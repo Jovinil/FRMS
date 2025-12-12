@@ -53,7 +53,8 @@ onMounted(async () => {
 const downloadRdanaReport = async () => {
   if (!selectedSubmission.value) return
 
-  const id = selectedSubmission.value.id
+  const id = selectedSubmission.value
+  console.log(selectedSubmission.value);
 
   try {
     const res = await fetch(`/api/rdana-report/${id}`)

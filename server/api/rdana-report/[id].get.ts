@@ -1,7 +1,11 @@
 // server/api/rdana-report/[id].get.ts
-import { defineEventHandler, createError } from 'h3'
+import { defineEventHandler, createError, setHeader } from 'h3'
 import { promises as fs } from 'fs'
 import path from 'path'
+import {
+  buildRdanaFormFromSubmission,
+  generateRdanaPdf,
+} from '~/../server/utils/rdanaPdf'
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id
@@ -13,30 +17,43 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const filePath = path.join(
-    process.cwd(),
-    'server/pdf/generated',
-    `RDANA-${id}.pdf`,
-  )
+  // Pull the saved submission from the database
+  const submission = await prisma.firstRdanaSubmission.findUnique({
+    where: { id },
+  })
+
+  if (!submission) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'RDANA submission not found',
+    })
+  }
 
   try {
-    const pdfBytes = await fs.readFile(filePath)
+    const form = buildRdanaFormFromSubmission(submission as any)
+    const pdfBytes = await generateRdanaPdf(form)
 
-    const res = event.node.res
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader(
+    // Persist a copy for reuse/debugging
+    const generatedDir = path.join(process.cwd(), 'server/pdf/generated')
+    await fs.mkdir(generatedDir, { recursive: true })
+    await fs.writeFile(
+      path.join(generatedDir, `RDANA-${id}.pdf`),
+      pdfBytes,
+    )
+
+    setHeader(event, 'Content-Type', 'application/pdf')
+    setHeader(
+      event,
       'Content-Disposition',
       `inline; filename="RDANA-${id}.pdf"`,
     )
 
-    res.end(pdfBytes)
-    return
+    return pdfBytes
   } catch (err) {
-    console.error('Error reading RDANA PDF:', err)
+    console.error('Error generating RDANA PDF:', err)
     throw createError({
-      statusCode: 404,
-      statusMessage: 'RDANA report not found',
+      statusCode: 500,
+      statusMessage: 'Failed to generate RDANA report',
     })
   }
 })
