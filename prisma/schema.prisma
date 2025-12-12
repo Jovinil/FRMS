@@ -118,6 +118,7 @@ model Barangay {
   province String
   city String
   purok String
+  region String
   population                              Int
   location                                String
   longitude                               Decimal
