@@ -14,8 +14,8 @@ const {
 // Example evac center data; replace with your API/Prisma data
 onMounted(async () => {
   const res = await $fetch('/api/evacuation-centers')
-  console.log(res.evacuationCenters)
-  setEvacCenters(res.evacuationCenters)
+  console.log(res)
+  setEvacCenters(res)
 })
 
 </script>

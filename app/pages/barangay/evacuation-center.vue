@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import mapboxgl, { Map as MapboxMap } from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css' // ✅ make markers + controls visible
+import 'mapbox-gl/dist/mapbox-gl.css'
+import type { FeatureCollection, Point } from 'geojson'
 
 type EvacCenterForm = {
   name: string
@@ -10,23 +11,37 @@ type EvacCenterForm = {
   longitude: number | null
 }
 
-// ✅ Runtime config with proper typing for Mapbox token
-const rawConfig = useRuntimeConfig() as {
-  public: {
-    mapboxAccessToken?: string
-  }
+type EvacCenter = {
+  id: number | string
+  name: string
+  latitude: number
+  longitude: number
+  capacity?: number | null
 }
 
-if (typeof rawConfig.public.mapboxAccessToken === 'string') {
-  mapboxgl.accessToken = rawConfig.public.mapboxAccessToken
+type EvacCenterFeatureProps = {
+  id: string | number
+  name: string
+  capacity: number | null
+}
+
+// ✅ Runtime config (support either key name)
+const rawConfig = useRuntimeConfig() as any
+const token =
+  rawConfig.public?.mapboxAccessToken ||
+  rawConfig.public?.mapboxToken ||
+  rawConfig.public?.mapboxAccessTokenPublic
+
+if (typeof token === 'string') {
+  mapboxgl.accessToken = token
 } else {
-  console.warn('Mapbox access token is missing. Set NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN in .env.')
+  console.warn('Mapbox access token is missing in runtime config.')
 }
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<MapboxMap | null>(null)
 
-// 🔧 Use `any` here to avoid the “Type instantiation is excessively deep” TS error
+// 🔧 marker for the "new center" pin
 const marker = ref<any | null>(null)
 
 const loading = ref(false)
@@ -37,9 +52,11 @@ const form = ref<EvacCenterForm>({
   longitude: null
 })
 
+// ✅ list of saved centers displayed as dots
+const evacCenters = ref<EvacCenter[]>([])
+
 /**
  * 🔷 YOUR POLYGON HERE
- * Replace POLYGON_COORDS with the coordinates of your actual polygon.
  * Format: [lng, lat]
  */
 const POLYGON_COORDS: [number, number][] = [
@@ -694,6 +711,7 @@ const POLYGON_COORDS: [number, number][] = [
           13.669901
         ]
 ]
+
 // Compute bounding box from polygon coords
 function getBoundsFromPolygon(coords: [number, number][]) {
   let minLng = Infinity
@@ -715,25 +733,106 @@ function getBoundsFromPolygon(coords: [number, number][]) {
 }
 
 const TILESET_BOUNDS = getBoundsFromPolygon(POLYGON_COORDS)
-
-// Add a small margin around the polygon
 const marginDeg = 0.002
 const BOUNDS_WITH_MARGIN: [[number, number], [number, number]] = [
-  [
-    TILESET_BOUNDS[0][0] - marginDeg,
-    TILESET_BOUNDS[0][1] - marginDeg
-  ],
-  [
-    TILESET_BOUNDS[1][0] + marginDeg,
-    TILESET_BOUNDS[1][1] + marginDeg
-  ]
+  [TILESET_BOUNDS[0][0] - marginDeg, TILESET_BOUNDS[0][1] - marginDeg],
+  [TILESET_BOUNDS[1][0] + marginDeg, TILESET_BOUNDS[1][1] + marginDeg]
 ]
 
-// Center = midpoint of polygon bounds
 const defaultCenter: [number, number] = [
   (TILESET_BOUNDS[0][0] + TILESET_BOUNDS[1][0]) / 2,
   (TILESET_BOUNDS[0][1] + TILESET_BOUNDS[1][1]) / 2
 ]
+
+// ---------- Evac centers layer helpers (from your composable pattern) ----------
+
+const EVAC_SOURCE_ID = 'evac-centers'
+const EVAC_LAYER_ID = 'evac-centers-layer'
+
+const buildEvacCentersGeoJSON = (): FeatureCollection<Point, EvacCenterFeatureProps> => ({
+  type: 'FeatureCollection',
+  features: evacCenters.value.map((e) => ({
+    type: 'Feature',
+    properties: {
+      id: e.id,
+      name: e.name,
+      capacity: e.capacity ?? null
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [e.longitude, e.latitude] as [number, number]
+    }
+  }))
+})
+
+
+const ensureEvacCentersLayer = (instance: MapboxMap) => {
+  // source
+  if (!instance.getSource(EVAC_SOURCE_ID)) {
+    instance.addSource(EVAC_SOURCE_ID, {
+      type: 'geojson',
+      data: buildEvacCentersGeoJSON()
+    })
+  }
+
+  // layer (dots)
+  if (!instance.getLayer(EVAC_LAYER_ID)) {
+    instance.addLayer({
+      id: EVAC_LAYER_ID,
+      type: 'circle',
+      source: EVAC_SOURCE_ID,
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#ef4444',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff'
+      }
+    })
+  }
+
+  // popup on click
+  instance.on('click', EVAC_LAYER_ID, (e: any) => {
+    const feature = e.features?.[0]
+    if (!feature) return
+
+    const [lng, lat] = feature.geometry.coordinates
+    const { name, capacity } = feature.properties || {}
+
+    new mapboxgl.Popup()
+      .setLngLat([lng, lat])
+      .setHTML(`
+        <div style="padding: 8px;">
+          <strong>${name || 'Evacuation Center'}</strong><br/>
+          ${capacity ? `Capacity: ${capacity} people` : ''}
+        </div>
+      `)
+      .addTo(instance)
+  })
+
+  instance.on('mouseenter', EVAC_LAYER_ID, () => {
+    instance.getCanvas().style.cursor = 'pointer'
+  })
+  instance.on('mouseleave', EVAC_LAYER_ID, () => {
+    instance.getCanvas().style.cursor = ''
+  })
+}
+
+const refreshEvacCentersOnMap = () => {
+  const instance = map.value
+  if (!instance) return
+  const source = instance.getSource(EVAC_SOURCE_ID) as any
+  if (source?.setData) {
+    source.setData(buildEvacCentersGeoJSON())
+  }
+}
+
+// Load saved centers from your API
+const loadEvacCenters = async () => {
+  // expects: [{ id, name, latitude, longitude, capacity }]
+  const rows = await $fetch<EvacCenter[]>('/api/evacuation-centers', { method: 'GET' })
+  evacCenters.value = rows || []
+  refreshEvacCentersOnMap()
+}
 
 onMounted(() => {
   if (!mapContainer.value) return
@@ -747,31 +846,27 @@ onMounted(() => {
 
   map.value = instance
 
-  instance.on('load', () => {
-    // 🔒 Restrict panning to polygon bounds + margin
+  instance.on('load', async () => {
     instance.setMaxBounds(BOUNDS_WITH_MARGIN)
-
-    // 🔍 Fit viewport to polygon area with padding
-    instance.fitBounds(BOUNDS_WITH_MARGIN, {
-      padding: 40
-    })
-
-    // Disable default double-click zoom
+    instance.fitBounds(BOUNDS_WITH_MARGIN, { padding: 40 })
     instance.doubleClickZoom.disable()
 
-    // 🔥 Double-click to drop/move pin + update lat/lng
+    // ✅ show all existing evacuation centers as dots
+    ensureEvacCentersLayer(instance)
+    await loadEvacCenters()
+
+    // ✅ Double-click to drop/move pin + update lat/lng (your original behavior)
     instance.on('dblclick', (e) => {
       const lngLat = e.lngLat
 
       if (!marker.value) {
         marker.value = new mapboxgl.Marker({
           draggable: true,
-          color: '#e11d48' // nice visible pink-red
+          color: '#e11d48'
         })
           .setLngLat(lngLat)
           .addTo(instance)
 
-        // Use `any` here to dodge the deep TS types
         ;(marker.value as any).on('dragend', () => {
           const newPos = marker.value!.getLngLat()
           form.value.latitude = newPos.lat
@@ -803,7 +898,7 @@ const handleSubmit = async () => {
   try {
     loading.value = true
 
-    const res = await $fetch('/api/evacuation-centers', {
+    await $fetch('/api/evacuation-centers', {
       method: 'POST',
       body: {
         name: form.value.name,
@@ -813,8 +908,17 @@ const handleSubmit = async () => {
       }
     })
 
-    console.log('Evacuation center payload:', form.value)
     alert('Evacuation center saved.')
+
+    // ✅ refresh dots immediately after save
+    await loadEvacCenters()
+
+    // optional: clear form
+    form.value.name = ''
+    form.value.capacity = null
+    // keep lat/lng if you want, or clear them:
+    // form.value.latitude = null
+    // form.value.longitude = null
   } catch (e) {
     console.error(e)
     alert('Failed to save evacuation center.')
@@ -823,6 +927,7 @@ const handleSubmit = async () => {
   }
 }
 </script>
+
 
 <template>
   <UPage>
