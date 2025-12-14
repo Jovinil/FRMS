@@ -1,19 +1,10 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import {
-  PDFCheckBox,
-  PDFDocument,
-  PDFRadioGroup,
-  PDFTextField,
-} from 'pdf-lib'
-import {
   createDefaultRdanaForm,
   type RdanaForm,
 } from '~/models/firstRdanaForm'
-import {
-  mapRdanaFormToPdfData,
-  type RdanaPdfPrimitive,
-} from '~/../src/pdf/rdanaFieldMapping'
+import { fillRdanaPdf } from '~/../src/pdf/fillRdanaPdf'
 
 const TEMPLATE_PATH = path.resolve(
   process.cwd(),
@@ -196,44 +187,9 @@ export async function generateRdanaPdf(
   // Ensure the template exists
   await fs.access(TEMPLATE_PATH)
 
-  const pdfBytes = await fs.readFile(TEMPLATE_PATH)
-  const pdfDoc = await PDFDocument.load(pdfBytes)
-  const pdfForm = pdfDoc.getForm()
-
-  const pdfData: Record<string, RdanaPdfPrimitive> =
-    mapRdanaFormToPdfData(form)
-
-  for (const [name, value] of Object.entries(pdfData)) {
-    let field
-    try {
-      field = pdfForm.getField(name)
-    } catch {
-      continue
-    }
-
-    const ctorName = field.constructor.name
-
-    try {
-      if (typeof value === 'string') {
-        if (ctorName === 'PDFTextField') {
-          ;(field as PDFTextField).setText(value)
-        } else if (ctorName === 'PDFRadioGroup' && value) {
-          ;(field as PDFRadioGroup).select(value)
-        }
-      } else if (typeof value === 'boolean') {
-        if (ctorName === 'PDFCheckBox') {
-          if (value) {
-            ;(field as PDFCheckBox).check()
-          } else {
-            ;(field as PDFCheckBox).uncheck()
-          }
-        }
-      }
-    } catch {
-      // Ignore problematic fields; keep generating the rest
-    }
-  }
-
-  const outBytes = await pdfDoc.save()
-  return new Uint8Array(outBytes)
+  const templateBytes = await fs.readFile(TEMPLATE_PATH)
+  // Delegate to the centralized filler that already knows how to map
+  // RdanaForm fields to the PDF template structure.
+  const filledBytes = await fillRdanaPdf(templateBytes, form)
+  return new Uint8Array(filledBytes)
 }

@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { computed } from 'vue';
   import { useRdanaForm } from '~/composables/useFirstRdanaForm';
-  import type { RdanaForm } from '~/models/firstRdanaForm';
 
 const { form, schema, steps, currentStep, nextStep, prevStep, submit, reset } = useRdanaForm();
 
@@ -17,22 +16,9 @@ const currentStepLabel = computed(() => {
   return step?.label || `Step ${currentStep.value + 1}`;
 });
 
-async function onSubmit() {
-  // await downloadRdanaPdf(form.value);
-  await submit();
-}
-
 const isDownloading = ref(false);
-const formData = ref<RdanaForm | null>(null); // whatever your actual state is
-
-async function downloadRdanaPdf(formData: RdanaForm) {
-  const res = await fetch('/api/rdana-pdf', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  });
+async function downloadRdanaReport(submissionId: string) {
+  const res = await fetch(`/api/rdana-report/${encodeURIComponent(submissionId)}`);
 
   if (!res.ok) {
     throw new Error('Failed to generate RDANA PDF');
@@ -43,7 +29,7 @@ async function downloadRdanaPdf(formData: RdanaForm) {
 
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'RDANA.pdf';
+  a.download = `RDANA-${submissionId}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -51,12 +37,16 @@ async function downloadRdanaPdf(formData: RdanaForm) {
   window.URL.revokeObjectURL(url);
 }
 
-async function handleDownload() {
-  if (!formData.value) return;
-
+async function onSubmit() {
   try {
     isDownloading.value = true;
-    await downloadRdanaPdf(formData.value);
+    const submission = await submit();
+
+    if (submission?.id) {
+      await downloadRdanaReport(submission.id);
+    }
+
+    await navigateTo('/mdrrmo');
   } finally {
     isDownloading.value = false;
   }

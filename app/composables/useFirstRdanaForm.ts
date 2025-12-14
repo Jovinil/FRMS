@@ -41,9 +41,7 @@ export function useRdanaForm() {
     rdanaFormSchema.parse(form.value);
 
     // Save to API / DB
-    await store.saveToApi();
-
-    // Optionally: navigate or show success toast
+    return store.saveToApi();
   }
 
   function reset() {

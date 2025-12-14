@@ -189,6 +189,7 @@ export default defineEventHandler(async (event) => {
       },
     })
 
+    console.log(submission)
     return submission
   } catch (err: any) {
     console.error('rdana-form.post error:', err)

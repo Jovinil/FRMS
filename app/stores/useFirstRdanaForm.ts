@@ -4,6 +4,8 @@ import { ref } from 'vue';
 import type { RdanaForm } from '~/models/firstRdanaForm';
 import { createDefaultRdanaForm } from '~/models/firstRdanaForm';
 
+type FirstRdanaSubmissionResponse = { id: string };
+
 export const useRdanaFormStore = defineStore('rdanaForm', () => {
   const form = ref<RdanaForm>(createDefaultRdanaForm());
   const { success, error } = useFlash();
@@ -17,7 +19,6 @@ export const useRdanaFormStore = defineStore('rdanaForm', () => {
       ...form.value,
       ...partial,
     };
-     return { form, patchForm, /* ... */ }
   }
 
   function reset() {
@@ -25,15 +26,14 @@ export const useRdanaFormStore = defineStore('rdanaForm', () => {
   }
 
   // placeholder for DB integration
-  async function saveToApi() {
+  async function saveToApi(): Promise<FirstRdanaSubmissionResponse> {
     try {
-      const result = await $fetch('/api/forms/first/create', {
+      const result = await $fetch<FirstRdanaSubmissionResponse>('/api/forms/first/create', {
         method: 'POST',
         body: form.value,
       })
 
       success('RDANA Form submitted successfully.');
-      await navigateTo('/mdrrmo');
       return result
     } catch (e) {
       console.error(e)

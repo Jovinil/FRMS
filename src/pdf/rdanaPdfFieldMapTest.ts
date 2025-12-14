@@ -20,130 +20,130 @@ export const RDANA_FIELD_MAPPING: RdanaFieldMappingEntry[] = [
   // -------------------------------
   // SECTION 1 – Profile of disaster
   // -------------------------------
-
-  // Example: "Name of Emergency Operation" -> text_1_1_1
+[
+  // Name of Emergency Operation
   {
     pdfName: 'text_1_1_1',
     kind: 'text',
-    path: 'profile.emergencyOperation.nameOfOperation',
-    value: (form) => form.profile.emergencyOperation.nameOfOperation || '',
+    path: 'emergencyOperation.nameOfOperation',
+    value: (form) => form.emergencyOperation?.nameOfOperation || '',
   },
 
   // Type of disaster
   {
     pdfName: 'text_1_1_2',
     kind: 'text',
-    path: 'profile.emergencyOperation.typeOfDisaster',
-    value: (form) => form.profile.emergencyOperation.typeOfDisaster || '',
+    path: 'emergencyOperation.typeOfDisaster',
+    value: (form) => form.emergencyOperation?.typeOfDisaster || '',
   },
 
   // Date/time of event
   {
     pdfName: 'text_1_1_3',
     kind: 'text',
-    path: 'profile.emergencyOperation.dateTimeOfEvent',
-    value: (form) => form.profile.emergencyOperation.dateTimeOfEvent || '',
+    path: 'emergencyOperation.dateTimeOfEvent',
+    value: (form) => form.emergencyOperation?.dateTimeOfEvent || '',
   },
 
   // Region / Province / City / Barangay / Sitio-Purok / GPS / DateTime of RDANA
   {
     pdfName: 'text_1_2_1',
     kind: 'text',
-    path: 'profile.mission.region',
-    value: (form) => form.profile.mission.region || '',
+    path: 'mission.region',
+    value: (form) => form.mission?.region || '',
   },
   {
     pdfName: 'text_1_2_2',
     kind: 'text',
-    path: 'profile.mission.province',
-    value: (form) => form.profile.mission.province || '',
+    path: 'mission.province',
+    value: (form) => form.mission?.province || '',
   },
   {
     pdfName: 'text_1_2_3',
     kind: 'text',
-    path: 'profile.mission.cityMunicipality',
-    value: (form) => form.profile.mission.cityMunicipality || '',
+    path: 'mission.cityMunicipality',
+    value: (form) => form.mission?.cityMunicipality || '',
   },
   {
     pdfName: 'text_1_2_4',
     kind: 'text',
-    path: 'profile.mission.barangay',
-    value: (form) => form.profile.mission.barangay || '',
+    path: 'mission.barangay',
+    value: (form) => form.mission?.barangay || '',
   },
   {
     pdfName: 'text_1_2_5',
     kind: 'text',
-    path: 'profile.mission.sitioPurok',
-    value: (form) => form.profile.mission.sitioPurok || '',
+    path: 'mission.sitioPurok',
+    value: (form) => form.mission?.sitioPurok || '',
   },
   {
     pdfName: 'text_1_2_6',
     kind: 'text',
-    path: 'profile.mission.gpsCoordinate',
-    value: (form) => form.profile.mission.gpsCoordinate || '',
+    path: 'mission.gpsCoordinate',
+    value: (form) => form.mission?.gpsCoordinate || '',
   },
   {
     pdfName: 'text_1_2_7',
     kind: 'text',
-    path: 'profile.mission.dateTimeOfRdana',
-    value: (form) => form.profile.mission.dateTimeOfRdana || '',
+    path: 'mission.dateTimeOfRdana',
+    value: (form) => form.mission?.dateTimeOfRdana || '',
   },
 
   // Summary description
   {
     pdfName: 'textarea_1',
     kind: 'text',
-    path: 'profile.summaryDescription',
-    value: (form) => form.profile.summaryDescription || '',
+    path: 'summaryDescription',
+    value: (form) => form.summaryDescription || '',
   },
 
   // -------------------------------
-  // Example: Accessibility section
+  // Accessibility section (your structure nests it under accessibilityPower)
   // -------------------------------
 
-  // 3.1: communityAccessible (radio_3_1)
+  // 3.1: communityAccessible
   {
     pdfName: 'radio_3_1',
     kind: 'radio',
-    path: 'accessibility.communityAccessible',
-    // ⚠️ adjust returned strings to match actual PDF radio values!
+    path: 'accessibilityPower.accessibility.communityAccessible',
     value: (form) => {
-      const v = form.accessibility.communityAccessible
+      const v = form.accessibilityPower?.accessibility?.communityAccessible
       if (v === 'yes') return 'yes'
       if (v === 'no') return 'no'
-      return '' // nothing selected
+      return ''
     },
   },
 
   // 3.2: Access mode checkboxes (example mapping only)
   {
-    pdfName: 'checkbox_3_2_a', // e.g. "Car/Bus"
+    pdfName: 'checkbox_3_2_a',
     kind: 'checkbox',
-    path: 'accessibility.accessModes.includes(AccessMode.CarBus)',
+    path: 'accessibilityPower.accessibility.accessModes.includes(AccessMode.CarBus)',
     value: (form) =>
-      form.accessibility.accessModes.includes(AccessMode.CarBus),
+      (form.accessibilityPower?.accessibility?.accessModes || []).includes(
+        AccessMode.CarBus
+      ),
   },
   {
-    pdfName: 'checkbox_3_2_b', // you decide which mode this corresponds to
+    pdfName: 'checkbox_3_2_b',
     kind: 'checkbox',
-    path: 'accessibility.accessModes.includes(AccessMode.Truck4wd10wheeler)',
+    path: 'accessibilityPower.accessibility.accessModes.includes(AccessMode.Truck4wd10wheeler)',
     value: (form) =>
-      form.accessibility.accessModes.includes(AccessMode.Truck4wd10wheeler),
+      (form.accessibilityPower?.accessibility?.accessModes || []).includes(
+        AccessMode.Truck4wd10wheeler
+      ),
   },
 
-  // ...repeat for other AccessMode values...
-
   // -------------------------------
-  // Example: Power status (section 4)
+  // Power status (your structure nests it under accessibilityPower.power)
   // -------------------------------
 
-  // "Is there power?" radio group (example only)
   {
     pdfName: 'radio_4_1',
     kind: 'radio',
-    path: 'power.powerStatus',
+    path: 'accessibilityPower.power.powerStatus',
     value: (form) => {
-      switch (form.power.powerStatus) {
+      switch (form.accessibilityPower?.power?.powerStatus) {
         case 'yes':
           return 'Yes'
         case 'none':
@@ -159,9 +159,8 @@ export const RDANA_FIELD_MAPPING: RdanaFieldMappingEntry[] = [
       }
     },
   },
-
-  // etc...
 ]
+
 
 /**
  * Convert a rich RdanaForm into a flat map
