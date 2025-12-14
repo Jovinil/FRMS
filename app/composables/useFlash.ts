@@ -2,9 +2,9 @@
 export type FlashLevel = 'success' | 'error' | 'info' | 'warning'
 
 export function useFlash() {
-  const toast = useToast() // directly use Nuxt UI toast
+  const toast = useToast()
 
-  const show = (level: FlashLevel, message: string) => {
+  const show = (level: FlashLevel, message: string, opts?: { persistent?: boolean }) => {
     toast.add({
       title:
         level === 'success'
@@ -13,14 +13,18 @@ export function useFlash() {
             ? 'Error'
             : 'Notice',
       description: message,
-      color: level, // 'success' | 'error' | 'info' | 'warning'
+      color: level,
       icon:
         level === 'success'
           ? 'i-lucide-check-circle-2'
           : level === 'error'
             ? 'i-lucide-x-circle'
             : 'i-lucide-info',
-      // duration is controlled globally via <UApp :toaster> (see below)
+
+      // ✅ override global duration for this toast only
+      ...(opts?.persistent ? { timeout: 0 } : {}),
+      // If your Nuxt UI build uses `duration` instead of `timeout`, use this instead:
+      // ...(opts?.persistent ? { duration: 0 } : {}),
     })
   }
 
@@ -29,5 +33,9 @@ export function useFlash() {
   const info = (message: string) => show('info', message)
   const warning = (message: string) => show('warning', message)
 
-  return { success, error, info, warning }
+  // ✅ persistent warning
+  const warningPersistent = (message: string) => show('warning', message, { persistent: true })
+
+  return { success, error, info, warning, warningPersistent }
 }
+  

@@ -1,32 +1,128 @@
-<!-- components/rdana/RdanaStepProfileMission.vue -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRdanaFormStore } from '~/stores/useFirstRdanaForm'
+import { useAuthStore } from '~/stores/useAuthStore'
 
 const store = useRdanaFormStore()
 const form = store.form
 
-// helper to format current datetime as "YYYY-MM-DD HH:mm"
-function formatNowForInput() {
+const auth = useAuthStore()
+
+const THIRD_LATEST_URL: string = '/api/forms/third-barangay/latest'
+const formatNowForInput = () => {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
-
-  const year = now.getFullYear()
-  const month = pad(now.getMonth() + 1)
-  const day = pad(now.getDate())
-  const hour = pad(now.getHours())
-  const minute = pad(now.getMinutes())
-
-  return `${year}-${month}-${day} ${hour}:${minute}`
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(
+    now.getHours()
+  )}:${pad(now.getMinutes())}`
 }
 
-onMounted(() => {
-  // only set default if user hasn't typed anything yet
-  if (!form.profile.emergencyOperation.dateTimeOfEvent) {
-    form.profile.emergencyOperation.dateTimeOfEvent = formatNowForInput()
+function isEmpty(v: unknown) {
+  return v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
+}
+
+function setIfEmpty(getter: () => any, setter: (v: any) => void, value: any) {
+  if (isEmpty(getter()) && !isEmpty(value)) setter(value)
+}
+
+// (optional) normalize strings into "YYYY-MM-DD HH:mm"
+function formatToInput(value: unknown) {
+  if (!value) return ''
+  if (typeof value === 'string') {
+    const s = value.trim()
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(s)) return s
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return s.replace('T', ' ')
+    if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0, 16)
+
+    const d = new Date(s)
+    if (!Number.isNaN(d.getTime())) return formatNowForInput() // fallback
+    return ''
+  }
+  if (value instanceof Date) return formatNowForInput()
+  if (typeof value === 'number') return formatNowForInput()
+  return ''
+}
+
+onMounted(async () => {
+  // 1) Date & Time of RDANA = NOW (only if empty)
+  setIfEmpty(
+    () => form.profile.mission.dateTimeOfRdana,
+    (v) => (form.profile.mission.dateTimeOfRdana = v),
+    formatNowForInput()
+  )
+
+  // Resolve barangayId from auth store (adjust to your auth shape)
+  const barangayId =
+    (auth.user as any)?.barangayId ??
+    (auth.user as any)?.barangay?.id
+
+  // 2) From user's barangayId: region/province/city/barangay/sitio/gps
+  if (barangayId) {
+    try {
+      const BARANGAY_URL: string = `/api/barangay/${barangayId}`
+
+      const b = await $fetch<any>(BARANGAY_URL)
+
+      setIfEmpty(() => form.profile.mission.region, (v) => (form.profile.mission.region = v), b.region)
+      setIfEmpty(() => form.profile.mission.province, (v) => (form.profile.mission.province = v), b.province)
+      setIfEmpty(
+        () => form.profile.mission.cityMunicipality,
+        (v) => (form.profile.mission.cityMunicipality = v),
+        b.cityMunicipality
+      )
+      setIfEmpty(() => form.profile.mission.barangay, (v) => (form.profile.mission.barangay = v), b.barangay)
+      setIfEmpty(
+        () => form.profile.mission.sitioPurok,
+        (v) => (form.profile.mission.sitioPurok = v),
+        b.sitioPurok
+      )
+
+      // gpsCoordinate wants longitude + latitude (you asked for "longitude and latitude")
+      if (!isEmpty(b.longitude) && !isEmpty(b.latitude)) {
+        const gps = `${b.longitude}, ${b.latitude}` // lng, lat
+        setIfEmpty(
+          () => form.profile.mission.gpsCoordinate,
+          (v) => (form.profile.mission.gpsCoordinate = v),
+          gps
+        )
+      }
+    } catch (e) {
+      console.warn('Failed to fetch barangay info:', e)
+    }
+
+    // 3) Date & Time of Event = incident date from Form 3
+    try {
+      const third = await $fetch<any>(THIRD_LATEST_URL, {
+        query: { barangayId: String(barangayId) },
+      })
+
+      const incident = formatToInput(third?.data?.profileOfDisaster?.dateTimeOfOccurrence)
+
+      setIfEmpty(
+        () => form.profile.emergencyOperation.dateTimeOfEvent,
+        (v) => (form.profile.emergencyOperation.dateTimeOfEvent = v),
+        incident
+      )
+    } catch (e) {
+      // If none exists yet, keep your current default behavior
+      console.warn('No Form 3 to prefill from:', e)
+      setIfEmpty(
+        () => form.profile.emergencyOperation.dateTimeOfEvent,
+        (v) => (form.profile.emergencyOperation.dateTimeOfEvent = v),
+        formatNowForInput()
+      )
+    }
+  } else {
+    // no barangayId → fallback only
+    setIfEmpty(
+      () => form.profile.emergencyOperation.dateTimeOfEvent,
+      (v) => (form.profile.emergencyOperation.dateTimeOfEvent = v),
+      formatNowForInput()
+    )
   }
 })
 </script>
+
 
 <template>
   <div class="space-y-6 mt-6">

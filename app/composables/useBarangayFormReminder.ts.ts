@@ -16,82 +16,38 @@ function formatRemaining(ms: number): string {
   return `${hours}h ${minutes}m`
 }
 
+// composables/useBarangayFormReminder.ts
 export function useBarangayFormReminder() {
   const auth = useAuthStore()
-  const { warning, info } = useFlash() // or useToast() directly
+  const { warningPersistent } = useFlash()
 
   const checkReminder = async () => {
-    const rawUserId = auth.user?.id
-    if (!rawUserId) return
+    // ✅ you need barangayId to call the endpoint
+    const barangayId = auth.user?.barangayId
+    if (!barangayId) return
 
-    const userId = String(rawUserId)
-
-    const progress = await $fetch<{
-      latestFormNumber: number
-      latestFormSubmittedAt: string | null
-    } | null>('/api/barangay/progress', {
-      params: { userId },
+    const progress = await $fetch<null | {
+      latest: { type: string; effectiveAt: string }
+      next: { label: string; windowMs: number; deadlineAt: string }
+    }>('/api/barangay/progress-by-barangay', {
+      params: { barangayId },
     })
 
-    if (!progress || !progress.latestFormSubmittedAt) {
-      // user has not submitted anything yet
-      return
-    }
+    if (!progress) return
 
-    const { latestFormNumber, latestFormSubmittedAt } = progress
-
-    // Decide which form is next
-    const nextFormNumber = latestFormNumber + 1
-
-    // if already on/after Form 3, no next form required (or handle differently)
-    if (nextFormNumber > 3) {
-      return
-    }
-
-    const windowMs = FORM_DEADLINES_MS[latestFormNumber]
-    if (!windowMs) return
-
-    const submittedAt = new Date(latestFormSubmittedAt)
+    const submittedAt = new Date(progress.latest.effectiveAt)
+    const deadlineAt = new Date(progress.next.deadlineAt)
     const now = new Date()
-    const elapsed = now.getTime() - submittedAt.getTime()
 
-    if (elapsed < 0) {
-      // clock skew; ignore
-      return
-    }
+    // (submittedAt is not required below, but keep if you want to log/debug)
+    const remaining = deadlineAt.getTime() - now.getTime()
 
-    if (elapsed >= windowMs) {
-      // deadline passed – you *could* show an overdue message instead
-      warning(
-        `The deadline to submit Form ${nextFormNumber} has passed. Please coordinate with the MDRRMO.`
-      )
-      return
-    }
-
-    // Still within allowed window → show "remaining time" warning
-    const remainingMs = windowMs - elapsed
-    const remainingText = formatRemaining(remainingMs)
-
-    // Customize per form
-    if (latestFormNumber === 1) {
-      // Form 1 submitted, Form 2 pending
-      warning(
-        `Form 2 must be submitted within ${remainingText}. Please complete Form 2.`
-      )
-    } else if (latestFormNumber === 2) {
-      // Form 2 submitted, Form 3 pending
-      warning(
-        `Form 3 must be submitted within ${remainingText}. Please complete Form 3.`
-      )
-    } else if (latestFormNumber === 3) {
-      // Optional: follow-up after Form 3
-      info(
-        `Please complete the required follow-up within ${remainingText}.`
-      )
+    if (remaining <= 0) {
+      warningPersistent(`Deadline passed for ${progress.next.label}. Please coordinate with the MDRRMO.`)
+    } else {
+      warningPersistent(`${progress.next.label} must be submitted within ${formatRemaining(remaining)}.`)
     }
   }
 
-  return {
-    checkReminder,
-  }
+  return { checkReminder }
 }

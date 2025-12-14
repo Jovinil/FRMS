@@ -7,7 +7,6 @@ import {
 } from '~/stores/useMdrrmoFirstRdanaStore'
 
 const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
 
 const store = useMdrrmoFirstRdanaStore()
 
@@ -45,61 +44,27 @@ const columns: TableColumn<MdrrmoFormRow>[] = [
   {
     accessorKey: 'incidentDatetime',
     header: 'Incident Date/Time',
-    cell: ({ row }) => {
-      const value = row.getValue('incidentDatetime') as string
-      return formatDate(value)
-    },
+    cell: ({ row }) => formatDate(row.getValue('incidentDatetime') as string),
   },
   {
     accessorKey: 'deadlineAt',
     header: 'Deadline',
-    cell: ({ row }) => {
-      const value = row.getValue('deadlineAt') as string
-      return formatDate(value)
-    },
+    cell: ({ row }) => formatDate(row.getValue('deadlineAt') as string),
   },
   {
     id: 'timeRemaining',
     header: 'Time Remaining',
-    cell: ({ row }) => {
-      const deadline = row.original.deadlineAt
-      return formatTimeRemaining(deadline)
-    },
+    cell: ({ row }) => formatTimeRemaining(row.original.deadlineAt),
   },
   {
     id: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      const deadline = row.original.deadlineAt
-      const submittedAt = row.original.submittedAt
-      const status = getStatus(deadline, submittedAt)
-
+      const status = getStatus(row.original.deadlineAt, row.original.submittedAt)
       return h(
         UBadge as any,
         { color: status.color, variant: 'subtle' },
         () => status.label,
-      )
-    },
-  },
-  {
-    id: 'actions',
-    header: '',
-    meta: {
-      class: {
-        th: 'text-right',
-        td: 'text-right',
-      },
-    },
-    cell: ({ row }) => {
-      const submittedAt = row.original.submittedAt
-      const label = submittedAt ? 'View' : 'Fill Form'
-      const color = submittedAt ? 'neutral' : 'primary'
-      const variant = submittedAt ? 'outline' : 'solid'
-
-      return h(
-        UButton as any,
-        { size: 'xs', color, variant },
-        () => label,
       )
     },
   },
@@ -152,10 +117,7 @@ onMounted(() => {
           :loading="store.loading"
         />
 
-        <p
-          v-if="store.error"
-          class="mt-2 text-sm text-red-500"
-        >
+        <p v-if="store.error" class="mt-2 text-sm text-red-500">
           {{ store.error }}
         </p>
       </UCard>

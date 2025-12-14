@@ -3,15 +3,19 @@ const toaster = { duration: 10000 } // 10-second toasts globally
 const auth = useAuthStore()
 const { checkReminder } = useBarangayFormReminder()
 
+const reminderChecked = ref(false)
+
 watch(
-  () => auth.user?.id,
-  async (id) => {
-    if (!id) return
-    // user just logged in or page reloaded while already logged in
+  () => [auth.user?.id, auth.user?.barangayId] as const,
+  async ([id, barangayId]) => {
+    if (!id || !barangayId) return
+    if (reminderChecked.value) return
+    reminderChecked.value = true
     await checkReminder()
   },
   { immediate: true }
 )
+
 </script>
 
 <template>
